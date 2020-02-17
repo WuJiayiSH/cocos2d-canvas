@@ -45,6 +45,16 @@ cc.create3DContext = function (canvas, opt_attribs) {
     return context;
 };
 
+
+cc.createCanvas = function (el, width, height) {
+    var canvas = document.createElement("canvas");
+    if(window.FlashCanvas) {
+        window.FlashCanvas.initElement(canvas);
+    }
+    return canvas;
+}
+
+
 /**
  * Browser detection, based on mootools<br/>
  * platform will print out win32, mac, etc<br/>
@@ -100,7 +110,7 @@ cc.Browser.multipleAudioWhiteList = ["baidubrowser", "opera", "firefox", "chrome
     } else {
         // WebGL first
         cc.Browser.supportWebGL = !(window.WebGLRenderingContext == null);
-        var tempCanvas = document.createElement("Canvas");
+        var tempCanvas = cc.createCanvas();
         var tempContext = cc.create3DContext(tempCanvas, {'stencil': true, 'preserveDrawingBuffer': true });
         cc.Browser.supportWebGL = !(tempContext == null)
     }
@@ -191,7 +201,7 @@ cc.$ = function (x) {
     /**
      * @type {HTMLElement}
      */
-    var el = (x instanceof HTMLElement) ? x : parent.querySelector(x);
+    var el = (window.HTMLElement ? x instanceof window.HTMLElement : x.nodeType == 1) ? x : parent.querySelector(x);
 
     if (el) {
         /**

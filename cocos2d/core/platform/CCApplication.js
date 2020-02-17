@@ -40,7 +40,8 @@ cc.TARGET_PLATFORM = {
     NACL:7,
     EMSCRIPTEN:8,
     MOBILE_BROWSER:100,
-    PC_BROWSER:101
+    PC_BROWSER:101,
+    FLASH:10000
 };
 
 /**
@@ -106,6 +107,12 @@ cc.renderContext = null;
 cc.canvas = null;
 
 /**
+ * offscreen Canvas of game engine
+ * @type HTMLCanvasElement
+ */
+cc.offscreenCanvas = null;
+
+/**
  * This Div element contain all game canvas
  * @type HTMLDivElement
  */
@@ -168,39 +175,25 @@ cc.isAddedHiddenEvent = false;
 cc.setup = function (el, width, height) {
     var element = cc.$(el) || cc.$('#' + el);
     var localCanvas, localContainer, localConStyle;
-    if (element.tagName == "CANVAS") {
-        width = width || element.width;
-        height = height || element.height;
-
-        //it is already a canvas, we wrap it around with a div
-        localContainer = cc.container = cc.$new("DIV");
+    if (element.tagName == "CANVAS" || element.tagName == "canvas") {
+        localContainer = cc.container = element.parentElement;
         localConStyle = localContainer.style;
         localCanvas = cc.canvas = element;
-        localCanvas.parentNode.insertBefore(localContainer, localCanvas);
-        localCanvas.appendTo(localContainer);
-        localConStyle.width = (width || 480) + "px";
-        localConStyle.height = (height || 320) + "px";
         localContainer.setAttribute('id', 'Cocos2dGameContainer');
-        localConStyle.margin = "0 auto";
-        localCanvas.setAttribute("width", width || 480);
-        localCanvas.setAttribute("height", height || 320);
-    } else {//we must make a new canvas and place into this element
-        if (element.tagName != "DIV") {
-            cc.log("Warning: target element is not a DIV or CANVAS");
+        
+        if(width) {
+            localConStyle.width = width + "px";
+            localCanvas.setAttribute("width", width);
         }
-        width = width || element.clientWidth;
-        height = height || element.clientHeight;
 
-        localCanvas = cc.canvas = cc.$new("CANVAS");
-        localCanvas.addClass("gameCanvas");
-        localCanvas.setAttribute("width", width || 480);
-        localCanvas.setAttribute("height", height || 320);
-        localContainer = cc.container = element;
-        localConStyle = localContainer.style;
-        element.appendChild(localCanvas);
-        localConStyle.width = (width || 480) + "px";
-        localConStyle.height = (height || 320) + "px";
-        localConStyle.margin = "0 auto";
+        if(height) {
+            localConStyle.height = height + "px";
+            localCanvas.setAttribute("height", height);
+        }
+
+        cc.offscreenCanvas = document.getElementById("offscreenCanvas")
+    } else {
+        throw "cannot find canvas";
     }
     localConStyle.position = 'relative';
     localConStyle.overflow = 'hidden';
@@ -301,9 +294,13 @@ cc._addUserSelectStatus = function(){
     var fontStyle = document.createElement("style");
     fontStyle.type = "text/css";
     document.body.appendChild(fontStyle);
-
-    fontStyle.textContent = "body,canvas,div{ -moz-user-select: none;-webkit-user-select: none;-ms-user-select: none;-khtml-user-select: none;"
-        +"-webkit-tap-highlight-color:rgba(0,0,0,0);}";
+    
+    var textContent = "body,canvas,div{ -moz-user-select: none;-webkit-user-select: none;-ms-user-select: none;-khtml-user-select: none;"
+        +"-webkit-tap-highlight-color:rgba(0,0,0,0);}"
+    if(typeof fontStyle.textContent == "undefined")
+        fontStyle.text = textContent;
+    else
+        fontStyle.textContent = textContent;
 };
 
 cc._isContextMenuEnable = false;
@@ -361,7 +358,15 @@ cc.Application = cc.Class.extend(/** @lends cc.Application# */{
     },
 
     getTargetPlatform:function(){
-        return cc.Browser.isMobile ? cc.TARGET_PLATFORM.MOBILE_BROWSER : cc.TARGET_PLATFORM.PC_BROWSER;
+        if (window.FlashCanvas) {
+            return cc.TARGET_PLATFORM.FLASH;
+        }
+
+        if (cc.Browser.isMobile) {
+            return cc.TARGET_PLATFORM.MOBILE_BROWSER;
+        }
+
+        return cc.TARGET_PLATFORM.PC_BROWSER;
     },
 
     /**

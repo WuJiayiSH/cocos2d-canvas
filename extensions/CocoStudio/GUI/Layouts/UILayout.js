@@ -1556,7 +1556,7 @@ if (cc.Browser.supportWebGL) {
     ccs.Layout.prototype.scissorClippingVisit = ccs.Layout.prototype._stencilClippingVisitForCanvas;
 }
 ccs.Layout._getSharedCache = function () {
-    return (cc.ClippingNode._sharedCache) || (cc.ClippingNode._sharedCache = document.createElement("canvas"));
+    return (cc.ClippingNode._sharedCache) || (cc.ClippingNode._sharedCache = cc.createCanvas());
 };
 /**
  * allocates and initializes a UILayout.

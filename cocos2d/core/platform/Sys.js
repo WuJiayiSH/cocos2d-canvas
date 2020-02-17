@@ -41,7 +41,11 @@ try{
 }
 
 sys._supportCanvasNewBlendModes = (function(){
-    var canvas = document.createElement('canvas');
+	var canvas = document.createElement('canvas');
+	if(!canvas.getContext){
+		return false;
+	}
+
     canvas.width = 1;
     canvas.height = 1;
     var context = canvas.getContext('2d');

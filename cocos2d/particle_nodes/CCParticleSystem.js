@@ -1667,7 +1667,7 @@ cc.ParticleSystem = cc.Node.extend(/** @lends cc.ParticleSystem# */{
                             return false;
                         }
 
-                        var canvasObj = document.createElement("canvas");
+                        var canvasObj = cc.createCanvas();
                         if(imageFormat === cc.FMT_PNG){
                             var myPngObj = new cc.PNGReader(buffer);
                             myPngObj.render(canvasObj);
@@ -2506,7 +2506,7 @@ cc.ParticleSystem = cc.Node.extend(/** @lends cc.ParticleSystem# */{
 
     _changeTextureColor: function(element, color, rect){
         if (!element.tintCache) {
-            element.tintCache = document.createElement('canvas');
+            element.tintCache = cc.createCanvas();
             element.tintCache.width = element.width;
             element.tintCache.height = element.height;
         }
@@ -2644,7 +2644,7 @@ if(!cc.Browser.supportWebGL && !sys._supportCanvasNewBlendModes)
             // Create another cache for the tinted version
             // This speeds up things by a fair bit
             if (!cacheTextureForColor.tintCache) {
-                cacheTextureForColor.tintCache = document.createElement('canvas');
+                cacheTextureForColor.tintCache = cc.createCanvas();
                 cacheTextureForColor.tintCache.width = element.width;
                 cacheTextureForColor.tintCache.height = element.height;
             }

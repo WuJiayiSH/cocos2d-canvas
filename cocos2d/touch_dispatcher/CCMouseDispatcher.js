@@ -588,6 +588,34 @@ cc.MouseDispatcher._registerHtmlElementEvent = function (element) {
     }
 
     //register canvas mouse event
+    if(!element.addEventListener){
+        // ie polyfill
+        element.addEventListener = function (event, func) {
+            element.attachEvent("on" + event, function () {
+                for(var i = 0; i < 3; i++){
+                    var j = 1 << (i > 0 ? (3 - i) : i)
+                    if(window.event.button & j){
+                        func({
+                            pageX: window.event.clientX,
+                            pageY: window.event.clientY,
+                            button: j,
+                            getButton: function(){
+                                return this.button;
+                            },
+                            stopPropagation: function(){
+                                window.event.cancelBubble = true;
+                            },
+                            preventDefault: function(){
+                                window.event.returnValue = false;
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    }
+
+            
     element.addEventListener("mousedown", function (event) {
         cc.Director.getInstance().getMouseDispatcher()._setMousePressed(true);
         cc.Director.getInstance().getMouseDispatcher().mouseHandle(getMouseByEvent(event), event, cc.MOUSE_DOWN);

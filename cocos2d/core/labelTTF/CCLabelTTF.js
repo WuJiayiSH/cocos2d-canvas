@@ -720,9 +720,22 @@ cc.LabelTTF = cc.Sprite.extend(/** @lends cc.LabelTTF# */{
     _getLabelContext:function () {
         if (this._labelContext)
             return this._labelContext;
+        var platform = cc.Application.getInstance().getTargetPlatform();
+        if(platform == cc.TARGET_PLATFORM.FLASH){
+            if (!this._labelCanvas) {
+                var locCanvas = cc.offscreenCanvas;
+                var labelTexture = new cc.Texture2D();
+                labelTexture.initWithElement(locCanvas);
+                this.setTexture(labelTexture);
+                this._labelCanvas = locCanvas;
+            }
+            
+            this._labelContext = this._labelCanvas.getContext("2d");
+            return this._labelContext;
+        }
 
         if (!this._labelCanvas) {
-            var locCanvas = document.createElement("canvas");
+            var locCanvas = cc.createCanvas();
             var labelTexture = new cc.Texture2D();
             labelTexture.initWithElement(locCanvas);
             this.setTexture(labelTexture);
@@ -822,12 +835,29 @@ cc.LabelTTF = cc.Sprite.extend(/** @lends cc.LabelTTF# */{
         locLabelCanvas.width = width;
         locLabelCanvas.height = height;
         if(flag) locContext.clearRect(0, 0, width, height);
-
         //draw text to labelCanvas
         this._drawTTFInCanvas(locContext);
-        this._texture.handleLoadedTexture();
+        
 
-        this.setTextureRect(cc.rect(0, 0, width, height));
+        var platform = cc.Application.getInstance().getTargetPlatform();
+        if(platform == cc.TARGET_PLATFORM.FLASH){
+            var locCanvas = cc.offscreenCanvas;
+            var data = locCanvas.toDataURL();
+            var image = new Image();
+            image.src = data;
+
+            this._texture.initWithElement(image);
+            this._texture.handleLoadedTexture();
+            this.setTextureRect(cc.rect(0, 0, width, height));
+
+            // clear offscreen canvas
+            locLabelCanvas.width = 1;
+            locLabelCanvas.height = 1;
+            locContext.clearRect(0, 0, 1, 1);
+        }else{
+            this._texture.handleLoadedTexture();
+            this.setTextureRect(cc.rect(0, 0, width, height));
+        }
         return true;
     },
 
@@ -886,7 +916,7 @@ cc.LabelTTF = cc.Sprite.extend(/** @lends cc.LabelTTF# */{
             cc.drawingUtil.drawPoly(verticesG1, 4, true);
         } else if (cc.SPRITE_DEBUG_DRAW === 2) {
             // draw texture box
-            var drawSizeG2 = this.getTextureRect()._size;
+            var drawSizeG2 = this.getTextureRect().getSize();
             var offsetPixG2 = this.getOffsetPosition();
             var verticesG2 = [cc.p(offsetPixG2.x, offsetPixG2.y), cc.p(offsetPixG2.x + drawSizeG2.width, offsetPixG2.y),
                 cc.p(offsetPixG2.x + drawSizeG2.width, offsetPixG2.y + drawSizeG2.height), cc.p(offsetPixG2.x, offsetPixG2.y + drawSizeG2.height)];
@@ -897,7 +927,7 @@ cc.LabelTTF = cc.Sprite.extend(/** @lends cc.LabelTTF# */{
 
     _setTextureRectForCanvas: function (rect, rotated, untrimmedSize) {
         this._rectRotated = rotated || false;
-        untrimmedSize = untrimmedSize || rect._size;
+        untrimmedSize = untrimmedSize || rect.getSize();
 
         this.setContentSize(untrimmedSize);
         this.setVertexRect(rect);

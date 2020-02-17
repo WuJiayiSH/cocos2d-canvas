@@ -91,7 +91,11 @@ if (/msie/i.test(navigator.userAgent) && !/opera/i.test(navigator.userAgent)) {
     //document.write(IEBinaryToArray_ByteStr_Script);
     var myVBScript = document.createElement('script');
     myVBScript.type = "text/vbscript";
-    myVBScript.textContent = IEBinaryToArray_ByteStr_Script;
+    if(typeof myVBScript.textContent == "undefined")
+        myVBScript.text = IEBinaryToArray_ByteStr_Script;
+    else
+        myVBScript.textContent = IEBinaryToArray_ByteStr_Script;
+    
     document.body.appendChild(myVBScript);
 
     // helper to convert from responseBody to a "responseText" like thing

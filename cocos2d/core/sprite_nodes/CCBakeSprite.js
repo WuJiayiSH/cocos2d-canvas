@@ -28,7 +28,7 @@ cc.BakeSprite = cc.Sprite.extend({
 
     ctor: function(){
         cc.Sprite.prototype.ctor.call(this);
-        var canvasElement = document.createElement("canvas");
+        var canvasElement = cc.createCanvas();
         canvasElement.width = canvasElement.height = 10;
         this._cacheCanvas = canvasElement;
         this._cacheContext = canvasElement.getContext("2d");

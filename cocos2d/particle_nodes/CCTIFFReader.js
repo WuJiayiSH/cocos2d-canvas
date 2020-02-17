@@ -224,7 +224,7 @@ cc.TIFFReader = cc.Class.extend({
     },
 
     parseTIFF: function (tiffData, canvas) {
-        canvas = canvas || document.createElement('canvas');
+        canvas = canvas || cc.createCanvas();
 
         this._tiffData = tiffData;
         this.canvas = canvas;

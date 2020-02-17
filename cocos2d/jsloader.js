@@ -305,7 +305,7 @@
         canvasNode.style.backgroundColor = "black";
         canvasNode.parentNode.appendChild(loadJsImg);
         
-        var canvasStyle = getComputedStyle?getComputedStyle(canvasNode):canvasNode.currentStyle;
+        var canvasStyle = window.getComputedStyle?getComputedStyle(canvasNode):canvasNode.currentStyle;
         loadJsImg.style.left = canvasNode.offsetLeft + (parseFloat(canvasStyle.width) - loadJsImg.width)/2 + "px";
         loadJsImg.style.top = canvasNode.offsetTop + (parseFloat(canvasStyle.height) - loadJsImg.height)/2 + "px";
         loadJsImg.style.position = "absolute";
@@ -313,7 +313,7 @@
     
     var updateLoading = function(p){
         if(p>=1) {
-            loadJsImg.parentNode.removeChild(loadJsImg);
+            if(loadJsImg.parentNode)loadJsImg.parentNode.removeChild(loadJsImg);
         }
     };
 
@@ -325,14 +325,24 @@
     var loadHandlerIE = function (loaded){
         loadNext();
         updateLoading(loaded / que.length);
-        this.removeEventListener('load', loadHandlerIE, false);
+        if(this.removeEventListener)this.removeEventListener('load', loadHandlerIE, false);
     };
     var loadNext = function () {
         i++;
         if (i < que.length) {
             var f = d.createElement('script');
-            f.src = que[i];
-            f.addEventListener('load', loadHandlerIE.bind(f, loaded), false);
+            if(f.addEventListener){
+                f.src = que[i];
+                f.addEventListener('load', loadHandlerIE.bind(f, loaded), false);
+            }else{
+                f.onreadystatechange = function () {
+                    if (this.readyState == "loaded" || this.readyState == "complete") {
+                        loadHandlerIE.apply(f, [loaded]);
+                    }
+                }
+                f.src = que[i];
+            }
+            
             d.body.appendChild(f);
         }
         updateLoading(i / (que.length - 1));
@@ -342,8 +352,10 @@
         updateLoading(loaded / que.length);
         this.removeEventListener('load', loadHandler, false);
     };
-
-    if (navigator.userAgent.indexOf("Trident/5") > -1) {
+    
+    var userAgent = navigator.userAgent;
+    if (userAgent.indexOf("Trident/5") > -1 ||
+    (userAgent.indexOf("MSIE") > 0 && userAgent.match(/MSIE ([\d.]+)/)[1] < 9)) {
         //ie9
         var i = -1;
 

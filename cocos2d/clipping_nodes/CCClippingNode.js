@@ -468,7 +468,7 @@ cc.ClippingNode._layer = -1;
 cc.ClippingNode._sharedCache = null;
 
 cc.ClippingNode._getSharedCache = function () {
-    return (cc.ClippingNode._sharedCache) || (cc.ClippingNode._sharedCache = document.createElement("canvas"));
+    return (cc.ClippingNode._sharedCache) || (cc.ClippingNode._sharedCache = cc.createCanvas());
 }
 
 /**

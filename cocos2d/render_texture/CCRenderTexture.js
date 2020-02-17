@@ -110,7 +110,7 @@ cc.RenderTexture = cc.Node.extend(/** @lends cc.RenderTexture# */{
         this._clearColor = cc.c4f(1, 1, 1, 1);
         this._clearColorStr = "rgba(255,255,255,1)";
 
-        this._cacheCanvas = document.createElement('canvas');
+        this._cacheCanvas = cc.createCanvas();
         this._cacheContext = this._cacheCanvas.getContext('2d');
         this.setAnchorPoint(0, 0);
     },

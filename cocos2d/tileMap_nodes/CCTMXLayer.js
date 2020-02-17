@@ -92,7 +92,7 @@ cc.TMXLayer = cc.SpriteBatchNode.extend(/** @lends cc.TMXLayer# */{
 
         if(cc.renderContextType === cc.CANVAS){
             var locCanvas = cc.canvas;
-            var tmpCanvas = document.createElement('canvas');
+            var tmpCanvas = cc.createCanvas();
             tmpCanvas.width = locCanvas.width;
             tmpCanvas.height = locCanvas.height;
             this._cacheCanvas = tmpCanvas;
@@ -139,7 +139,7 @@ cc.TMXLayer = cc.SpriteBatchNode.extend(/** @lends cc.TMXLayer# */{
                 var locSubCacheCanvas = this._subCacheCanvas, i;
                 for(i = 0; i < this._subCacheCount; i++) {
                     if(!locSubCacheCanvas[i]) {
-                        locSubCacheCanvas[i] = document.createElement('canvas');
+                        locSubCacheCanvas[i] = cc.createCanvas();
                         this._subCacheContext[i] = locSubCacheCanvas[i].getContext('2d');
                     }
                     var tmpCanvas = locSubCacheCanvas[i];
@@ -551,7 +551,7 @@ cc.TMXLayer = cc.SpriteBatchNode.extend(/** @lends cc.TMXLayer# */{
                     var rect = this._tileSet.rectForGID(gid);
                     rect = cc.RECT_PIXELS_TO_POINTS(rect);
 
-                    sprite.setTextureRect(rect, false, rect._size);
+                    sprite.setTextureRect(rect, false, rect.getSize());
                     if (flags != null)
                         this._setupTileSprite(sprite, pos, gidAndFlags);
 
@@ -927,7 +927,7 @@ cc.TMXLayer = cc.SpriteBatchNode.extend(/** @lends cc.TMXLayer# */{
                 this._reusedTile.setBatchNode(null);
 
                 // Re-init the sprite
-                this._reusedTile.setTextureRect(rect, false, rect._size);
+                this._reusedTile.setTextureRect(rect, false, rect.getSize());
 
                 // restore the batch node
                 this._reusedTile.setBatchNode(this);

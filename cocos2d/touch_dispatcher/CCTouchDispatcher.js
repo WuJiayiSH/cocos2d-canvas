@@ -599,10 +599,17 @@ cc.getHTMLElementPosition = function (element) {
     var docElem = document.documentElement;
     var win = window;
     var box = null;
-    if (typeof element.getBoundingClientRect === 'function') {
-        box = element.getBoundingClientRect();
+    if (element.getBoundingClientRect) {
+        var rect = element.getBoundingClientRect();
+        box = {
+            left:rect.left,
+            top:rect.top,
+            width:rect.width || rect.right - rect.left,
+            height:rect.height || rect.bottom - rect.top
+        };
     } else {
-        if (element instanceof HTMLCanvasElement) {
+        if (window.HTMLCanvasElement ? element instanceof HTMLCanvasElement :
+            (element.nodeType == 1 && element.tagName == "canvas")) {
             box = {
                 left:0,
                 top:0,
@@ -619,8 +626,8 @@ cc.getHTMLElementPosition = function (element) {
         }
     }
     return {
-        left:box.left + win.pageXOffset - docElem.clientLeft,
-        top:box.top + win.pageYOffset - docElem.clientTop,
+        left:box.left + (win.pageXOffset || document.documentElement.scrollLeft) - docElem.clientLeft,
+        top:box.top + (win.pageYOffset || document.documentElement.scrollTop) - docElem.clientTop,
         width:box.width,
         height:box.height
     };
@@ -695,6 +702,33 @@ cc.TouchDispatcher.registerHtmlElementEvent = function (element) {
         });
 
         //register canvas mouse event
+        if(!element.addEventListener){
+            // ie8 polyfill
+            element.addEventListener = function (event, func) {
+                element.attachEvent("on" + event, function () {
+                    for(var i = 0; i < 3; i++){
+                        var j = 1 << (i > 0 ? (3 - i) : i)
+                        if(window.event.button & j){
+                            func({
+                                pageX: window.event.clientX,
+                                pageY: window.event.clientY,
+                                button: j,
+                                getButton: function(){
+                                    return this.button;
+                                },
+                                stopPropagation: function(){
+                                    window.event.cancelBubble = true;
+                                },
+                                preventDefault: function(){
+                                    window.event.returnValue = false;
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        }
+
         element.addEventListener("mousedown", function (event) {
             cc.Director.getInstance().getTouchDispatcher()._setMousePressed(true);
             var pos = cc.getHTMLElementPosition(element);

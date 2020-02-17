@@ -222,23 +222,23 @@ cc.sizeEqualToSize = function (size1, size2) {
 cc.Rect = function (x1, y1, width1, height1) {
     var argLen =arguments.length;
     if(argLen === 4){
-        this._origin = new cc.Point(x1 || 0, y1 || 0);
-        this._size = new cc.Size(width1 || 0, height1 || 0);
+        this.x = x1 || 0, this.y = y1 || 0;
+        this.width = width1 || 0, this.height = height1 || 0;
         return;
     }
     if(argLen === 1) {
-        this._origin = new cc.Point(x1._origin.x, x1._origin.y);
-        this._size = new cc.Size(x1._size.width, x1._size.height);
+        this.x = x1.x, this.y = x1.y;
+        this.width = x1.width, this.height = x1.height;
         return;
     }
     if(argLen === 0) {
-        this._origin = new cc.Point(0, 0);
-        this._size = new cc.Size(0,0);
+        this.x = 0, this.y = 0;
+        this.width = 0, this.height = 0;
         return;
     }
     if(argLen === 2) {
-        this._origin = new cc.Point(x1.x, x1.y);
-        this._size = new cc.Size(y1.width,y1.height);
+        this.x = x1.x, this.y = x1.y;
+        this.width = y1.width, this.height = y1.height;
         return;
     }
     throw "unknown argument type";
@@ -459,74 +459,61 @@ cc.rectIntersection = function (rectA, rectB) {
 //   rect.origin, rect.size
 //
 cc.Rect.prototype.getX = function() {
-    return this._origin.x;
+    return this.x;
 };
 cc.Rect.prototype.setX = function(x) {
-    this._origin.x = x;
+    this.x = x;
 };
 cc.Rect.prototype.getY = function() {
-    return this._origin.y;
+    return this.y;
 };
 cc.Rect.prototype.setY = function(y) {
-    this._origin.y = y;
+    this.y = y;
 };
 cc.Rect.prototype.getWidth = function(){
-    return this._size.width;
+    return this.width;
 };
 cc.Rect.prototype.setWidth = function(w){
-    this._size.width = w;
+    this.width = w;
 };
 cc.Rect.prototype.getHeight = function(){
-    return this._size.height;
+    return this.height;
 };
 cc.Rect.prototype.setHeight = function(h){
-    this._size.height = h;
+    this.height = h;
 };
-
-Object.defineProperties(cc.Rect.prototype,
-    {
-        "x": {
-            get: function () {
-                return this.getX();
-            },
-            set: function (newValue) {
-                this.setX(newValue);
-            },
-            enumerable: true,
-            configurable: true
-        },
-        "y": {
-            get: function () {
-                return this.getY();
-            },
-            set: function (newValue) {
-                this.setY(newValue);
-            },
-            enumerable: true,
-            configurable: true
-        },
-        "width": {
-            get: function () {
-                return this.getWidth();
-            },
-            set: function (newValue) {
-                this.setWidth(newValue);
-            },
-            enumerable: true,
-            configurable: true
-        },
-        "height": {
-            get: function () {
-                return this.getHeight();
-            },
-            set: function (newValue) {
-                this.setHeight(newValue);
-            },
-            enumerable: true,
-            configurable: true
-        }
+cc.Rect.prototype.getSize = function(){
+    return cc.size(this.width, this.height);
+};
+cc.Rect.prototype.getOrigin = function(){
+    return cc.p(this.x, this.y);
+};
+cc.Rect.prototype.setSize = function(width1, height1){
+    var argLen =arguments.length;
+    
+    if(argLen === 1) {
+        this.width = width1.width, this.height = width1.height;
+        return;
     }
-);
+    if(argLen === 2) {
+        this.width = width1, this.height = height1;
+        return;
+    }
+    throw "unknown argument type";
+};
+cc.Rect.prototype.setOrigin = function(x1, y1){
+    var argLen =arguments.length;
+    
+    if(argLen === 1) {
+        this.x = x1.x, this.y = x1.y;
+        return;
+    }
+    if(argLen === 2) {
+        this.x = x1, this.y = y1;
+        return;
+    }
+    throw "unknown argument type";
+};
 
 // Deprecated
 /*cc.Rect.CCRectEqualToRect = cc.rectEqualToRect;

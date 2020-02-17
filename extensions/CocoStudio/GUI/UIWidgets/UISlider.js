@@ -414,7 +414,7 @@ ccs.Slider = ccs.Widget.extend(/** @lends ccs.Slider# */{
             if (this._progressBarTexType == ccs.TextureResType.plist) {
                 var barNode = this._progressBarRenderer;
                 if (barNode) {
-                    var to = barNode.getTextureRect()._origin;
+                    var to = barNode.getTextureRect();
                     x = to.x;
                     y = to.y;
                 }

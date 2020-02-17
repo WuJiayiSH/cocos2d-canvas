@@ -142,7 +142,7 @@ cc._logToWebPage = function (message) {
  */
 cc.log = function (message) {
     if (!cc.IS_SHOW_DEBUG_ON_PAGE) {
-        console.log.apply(console, arguments);
+        if(window.console)console.log(message)
     } else {
         cc._logToWebPage(message);
     }
@@ -154,7 +154,7 @@ cc.log = function (message) {
  * @function
  */
 cc.MessageBox = function (message) {
-    console.log(message);
+    alert(message);
 };
 
 /**

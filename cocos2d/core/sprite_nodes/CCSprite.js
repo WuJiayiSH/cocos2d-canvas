@@ -40,7 +40,7 @@ cc.SPRITE_INDEX_NOT_INITIALIZED = -1;
  * @returns {HTMLCanvasElement}
  */
 cc.generateTintImageWithMultiply = function(image, color, rect, renderCanvas){
-    renderCanvas = renderCanvas || document.createElement("canvas");
+    renderCanvas = renderCanvas || cc.createCanvas();
     rect = rect || cc.rect(0,0, image.width, image.height);
 
     var context = renderCanvas.getContext( "2d" );
@@ -91,10 +91,10 @@ cc.generateTextureCacheForColor = function (texture) {
     }
 
     var textureCache = [
-        document.createElement("canvas"),
-        document.createElement("canvas"),
-        document.createElement("canvas"),
-        document.createElement("canvas")
+       cc.createCanvas(),
+       cc.createCanvas(),
+       cc.createCanvas(),
+       cc.createCanvas()
     ];
 
     function renderToCache() {
@@ -152,8 +152,8 @@ cc.generateTextureCacheForColor = function (texture) {
     return textureCache;
 };
 
-cc.generateTextureCacheForColor.canvas = document.createElement('canvas');
-cc.generateTextureCacheForColor.tempCanvas = document.createElement('canvas');
+cc.generateTextureCacheForColor.canvas = cc.createCanvas();
+cc.generateTextureCacheForColor.tempCanvas = cc.createCanvas();
 cc.generateTextureCacheForColor.tempCtx = cc.generateTextureCacheForColor.tempCanvas.getContext('2d');
 
 /**
@@ -187,7 +187,7 @@ cc.generateTintImage = function (texture, tintedImgCache, color, rect, renderCan
 
     // Create a new buffer if required
     if (!buff) {
-        buff = document.createElement("canvas");
+        buff = cc.createCanvas();
         buff.width = w;
         buff.height = h;
         ctx = buff.getContext("2d");
@@ -230,7 +230,7 @@ cc.cutRotateImageToCanvas = function (texture, rect) {
     if (!rect)
         return texture;
 
-    var nCanvas = document.createElement("canvas");
+    var nCanvas = cc.createCanvas();
     nCanvas.width = rect.width;
     nCanvas.height = rect.height;
 
@@ -985,7 +985,8 @@ cc.Sprite = cc.NodeRGBA.extend(/** @lends cc.Sprite# */{
             } else if (typeof(fileName) === "object") {
                 if (fileName instanceof cc.SpriteFrame) {
                     this.initWithSpriteFrame(fileName);
-                } else if ((fileName instanceof HTMLImageElement) || (fileName instanceof HTMLCanvasElement)) {
+                } else if ((window.HTMLImageElement ? fileName instanceof HTMLImageElement : 
+                    fileName.nodeType == 1 && fileName.tagName == "IMG") || (fileName instanceof HTMLCanvasElement)) {
                     var texture2d = new cc.Texture2D();
                     texture2d.initWithElement(fileName);
                     texture2d.handleLoadedTexture();
@@ -1017,7 +1018,8 @@ cc.Sprite = cc.NodeRGBA.extend(/** @lends cc.Sprite# */{
             } else if (typeof(fileName) === "object") {
                 if (fileName instanceof cc.SpriteFrame) {
                     this.initWithSpriteFrame(fileName);
-                } else if ((fileName instanceof HTMLImageElement) || (fileName instanceof HTMLCanvasElement)) {
+                } else if ((window.HTMLImageElement ? fileName instanceof HTMLImageElement : 
+                    fileName.nodeType == 1 && fileName.tagName == "IMG") || (fileName instanceof HTMLCanvasElement)) {
                     var texture2d = new cc.Texture2D();
                     texture2d.initWithElement(fileName);
                     texture2d.handleLoadedTexture();
@@ -1246,7 +1248,7 @@ cc.Sprite = cc.NodeRGBA.extend(/** @lends cc.Sprite# */{
             rect = cc.rect(0, 0, locSize1.width, locSize1.height);
         }
         this.setTexture(texture);
-        this.setTextureRect(rect, rotated, rect._size);
+        this.setTextureRect(rect, rotated, rect.getSize());
 
         // by default use "Self Render".
         // if the sprite is added to a batchnode, then it will automatically switch to "batchnode Render"
@@ -1306,7 +1308,7 @@ cc.Sprite = cc.NodeRGBA.extend(/** @lends cc.Sprite# */{
         this._originalTexture = texture;
 
         this.setTexture(texture);
-        this.setTextureRect(rect, rotated, rect._size);
+        this.setTextureRect(rect, rotated, rect.getSize());
 
         // by default use "Self Render".
         // if the sprite is added to a batchnode, then it will automatically switch to "batchnode Render"
@@ -1332,7 +1334,7 @@ cc.Sprite = cc.NodeRGBA.extend(/** @lends cc.Sprite# */{
         }
 
         this.setTexture(sender);
-        this.setTextureRect(locRect, this._rectRotated, locRect._size);
+        this.setTextureRect(locRect, this._rectRotated, locRect.getSize());
 
         // by default use "Self Render".
         // if the sprite is added to a batchnode, then it will automatically switch to "batchnode Render"
@@ -1358,7 +1360,7 @@ cc.Sprite = cc.NodeRGBA.extend(/** @lends cc.Sprite# */{
         this._originalTexture = sender;
 
         this.setTexture(sender);
-        this.setTextureRect(locRect, this._rectRotated, locRect._size);
+        this.setTextureRect(locRect, this._rectRotated, locRect.getSize());
 
         // by default use "Self Render".
         // if the sprite is added to a batchnode, then it will automatically switch to "batchnode Render"
@@ -1376,7 +1378,7 @@ cc.Sprite = cc.NodeRGBA.extend(/** @lends cc.Sprite# */{
 
     _setTextureRectForWebGL:function (rect, rotated, untrimmedSize) {
         this._rectRotated = rotated || false;
-        untrimmedSize = untrimmedSize || rect._size;
+        untrimmedSize = untrimmedSize || rect.getSize();
 
         this.setContentSize(untrimmedSize);
         this.setVertexRect(rect);
@@ -1418,7 +1420,7 @@ cc.Sprite = cc.NodeRGBA.extend(/** @lends cc.Sprite# */{
 
     _setTextureRectForCanvas: function (rect, rotated, untrimmedSize) {
         this._rectRotated = rotated || false;
-        untrimmedSize = untrimmedSize || rect._size;
+        untrimmedSize = untrimmedSize || rect.getSize();
 
         this.setContentSize(untrimmedSize);
         this.setVertexRect(rect);
@@ -1479,7 +1481,7 @@ cc.Sprite = cc.NodeRGBA.extend(/** @lends cc.Sprite# */{
                 // calculate the Quad based on the Affine Matrix
                 //
                 var locTransformToBatch = this._transformToBatch;
-                var size = this._rect._size;
+                var size = this._rect.getSize();
                 var x1 = this._offsetPosition.x;
                 var y1 = this._offsetPosition.y;
 
@@ -1891,7 +1893,8 @@ cc.Sprite = cc.NodeRGBA.extend(/** @lends cc.Sprite# */{
             throw "cc.Sprite.setTexture(): setTexture expects a CCTexture2D. Invalid argument";
 
         if (this._texture != texture) {
-            if (texture && texture.getHtmlElementObj() instanceof  HTMLImageElement) {
+            if (texture && (window.HTMLImageElement ? texture.getHtmlElementObj() instanceof HTMLImageElement : 
+                    texture.getHtmlElementObj().nodeType == 1 && texture.getHtmlElementObj().tagName == "IMG")) {
                 this._originalTexture = texture;
             }
             this._texture = texture;
@@ -2084,7 +2087,7 @@ cc.Sprite = cc.NodeRGBA.extend(/** @lends cc.Sprite# */{
             cc.drawingUtil.drawPoly(verticesG1, 4, true);
         } else if (cc.SPRITE_DEBUG_DRAW === 2) {
             // draw texture box
-            var drawSizeG2 = this.getTextureRect()._size;
+            var drawSizeG2 = this.getTextureRect().getSize();
             var offsetPixG2 = this.getOffsetPosition();
             var verticesG2 = [cc.p(offsetPixG2.x, offsetPixG2.y), cc.p(offsetPixG2.x + drawSizeG2.width, offsetPixG2.y),
                 cc.p(offsetPixG2.x + drawSizeG2.width, offsetPixG2.y + drawSizeG2.height), cc.p(offsetPixG2.x, offsetPixG2.y + drawSizeG2.height)];
@@ -2154,7 +2157,7 @@ cc.Sprite = cc.NodeRGBA.extend(/** @lends cc.Sprite# */{
         } else if (cc.SPRITE_DEBUG_DRAW === 2) {
             // draw texture box
             context.strokeStyle = "rgba(0,255,0,1)";
-            var drawSize = this._rect._size;
+            var drawSize = this._rect.getSize();
             flipYOffset = -flipYOffset;
             var vertices2 = [cc.p(flipXOffset, flipYOffset), cc.p(flipXOffset + drawSize.width, flipYOffset),
                 cc.p(flipXOffset + drawSize.width, flipYOffset - drawSize.height), cc.p(flipXOffset, flipYOffset - drawSize.height)];

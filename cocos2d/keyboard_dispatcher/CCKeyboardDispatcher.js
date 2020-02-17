@@ -177,12 +177,16 @@ cc.KeyboardDispatcher.getInstance = function () {
         cc.canvas.setAttribute('tabindex', 1);
         cc.canvas.style.outline = 'none';
         cc.canvas.style.cursor = 'default';
-        cc.canvas.addEventListener("keydown", function (e) {
-            cc.keyboardDispatcher.dispatchKeyboardMSG(e, true);
-        });
-        cc.canvas.addEventListener("keyup", function (e) {
-            cc.keyboardDispatcher.dispatchKeyboardMSG(e, false);
-        });
+        if(!cc.canvas.addEventListener){
+            cc.log("TODO: add keyboard listener")
+        }else{
+            cc.canvas.addEventListener("keydown", function (e) {
+                cc.keyboardDispatcher.dispatchKeyboardMSG(e, true);
+            });
+            cc.canvas.addEventListener("keyup", function (e) {
+                cc.keyboardDispatcher.dispatchKeyboardMSG(e, false);
+            });
+        }
     }
     return cc.keyboardDispatcher;
 };

@@ -252,7 +252,7 @@ ccs.LoadingBar = ccs.Widget.extend(/** @lends ccs.LoadingBar# */{
         if(this._renderBarTexType==ccs.TextureResType.plist){
             var barNode = this._barRenderer;
             if (barNode) {
-                var to = barNode.getTextureRect()._origin;
+                var to = barNode.getTextureRect();
                 x = to.x;
                 y = to.y;
             }
