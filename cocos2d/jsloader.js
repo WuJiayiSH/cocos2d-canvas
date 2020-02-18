@@ -313,7 +313,13 @@
     
     var updateLoading = function(p){
         if(p>=1) {
-            if(loadJsImg.parentNode)loadJsImg.parentNode.removeChild(loadJsImg);
+            if(loadJsImg.parentNode) {
+                loadJsImg.parentNode.removeChild(loadJsImg);
+            }else {
+                var d = document.createElement('div');  
+                d.appendChild(loadJsImg);  
+                d.innerHTML = '';
+            }
         }
     };
 
