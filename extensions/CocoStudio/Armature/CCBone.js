@@ -619,6 +619,7 @@ ccs.Bone = ccs.NodeRGBA.extend(/** @lends ccs.Bone# */{
 
     /**
      * BlendFunc  setter
+     * @deprecated It should work with webgl, but globalCompositeOperation in canvas does not cover all the situations, plus flashcanvas does not support globalCompositeOperation at all
      * @param {cc.BlendFunc} blendFunc
      */
     setBlendFunc:function (blendFunc) {

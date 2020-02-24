@@ -105,6 +105,7 @@ cc.AtlasNode = cc.NodeRGBA.extend(/** @lends cc.AtlasNode# */{
 
     /**
      * BlendFunc setter
+     * @deprecated It should work with webgl, but globalCompositeOperation in canvas does not cover all the situations, plus flashcanvas does not support globalCompositeOperation at all
      * @param {Number | cc.BlendFunc} src
      * @param {Number} dst
      */

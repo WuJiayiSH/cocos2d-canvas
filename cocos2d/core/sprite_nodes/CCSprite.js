@@ -1056,7 +1056,9 @@ cc.Sprite = cc.NodeRGBA.extend(/** @lends cc.Sprite# */{
             locBlendFunc.dst = dst;
         }
     },
-
+    /**
+     * @deprecated It should work with webgl, but globalCompositeOperation in canvas does not cover all the situations, plus flashcanvas does not support globalCompositeOperation at all
+     */
     _setBlendFuncForCanvas: function (src, dst) {
         var locBlendFunc = this._blendFunc;
         if (dst === undefined) {

@@ -105,7 +105,9 @@ cc.DrawNodeCanvas = cc.Node.extend(/** @lends cc.DrawNodeCanvas# */{
     getBlendFunc: function () {
         return this._blendFunc;
     },
-
+    /**
+     * @deprecated It should work with webgl, but globalCompositeOperation in canvas does not cover all the situations, plus flashcanvas does not support globalCompositeOperation at all
+     */
     setBlendFunc: function (blendFunc) {
         this._blendFunc = blendFunc;
     },
@@ -540,7 +542,9 @@ cc.DrawNodeWebGL = cc.Node.extend(/** @lends cc.DrawNodeWebGL# */{
     getBlendFunc:function () {
         return this._blendFunc;
     },
-
+    /**
+     * @deprecated It should work with webgl, but globalCompositeOperation in canvas does not cover all the situations, plus flashcanvas does not support globalCompositeOperation at all
+     */
     setBlendFunc:function (blendFunc) {
         this._blendFunc = blendFunc;
     },

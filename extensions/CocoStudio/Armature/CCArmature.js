@@ -458,6 +458,7 @@ ccs.Armature = ccs.NodeRGBA.extend(/** @lends ccs.Armature# */{
 
     /**
      * conforms to cc.TextureProtocol protocol
+     * @deprecated It should work with webgl, but globalCompositeOperation in canvas does not cover all the situations, plus flashcanvas does not support globalCompositeOperation at all
      * @param {cc.BlendFunc} blendFunc
      */
     setBlendFunc: function (blendFunc) {

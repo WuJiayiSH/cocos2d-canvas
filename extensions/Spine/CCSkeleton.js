@@ -189,6 +189,9 @@ sp.Skeleton = cc.NodeRGBA.extend({
     getBlendFunc: function () {
         return this._blendFunc;
     },
+    /**
+     * @deprecated It should work with webgl, but globalCompositeOperation in canvas does not cover all the situations, plus flashcanvas does not support globalCompositeOperation at all
+     */
     setBlendFunc: function (_blendFunc) {
         this._blendFunc = _blendFunc;
     },
