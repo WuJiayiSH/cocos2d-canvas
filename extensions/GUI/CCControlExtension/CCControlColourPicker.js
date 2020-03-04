@@ -30,7 +30,11 @@
  * converted to Javascript / cocos2d-x by Angus C
  */
 
-cc.ControlColourPicker = cc.Control.extend({
+/**
+ * @class
+ * @extends cc.Control
+ */
+cc.ControlColourPicker = cc.Control.extend(/** @lends cc.ControlColourPicker# */{
     _hsv:null,
     _colourPicker:null,
     _huePicker:null,

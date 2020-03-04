@@ -58,7 +58,7 @@ cc.CONTROL_STATE_INITIAL = 1 << 3;
  * @class
  * @extends cc.LayerRGBA
  */
-cc.Control = cc.LayerRGBA.extend({
+cc.Control = cc.LayerRGBA.extend(/** @lends cc.Control# */{
     _isOpacityModifyRGB:false,
     _hasVisibleParents:false,
 

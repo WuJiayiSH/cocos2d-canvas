@@ -39,7 +39,7 @@ cc.AUTOREPEAT_INCREASETIME_INCREMENT = 12;
  * @class
  * @extends cc.Control
  */
-cc.ControlStepper = cc.Control.extend({
+cc.ControlStepper = cc.Control.extend(/** @lends cc.ControlStepper# */{
     _minusSprite:null,
     _plusSprite:null,
     _minusLabel:null,

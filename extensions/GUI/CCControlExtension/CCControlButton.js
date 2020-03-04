@@ -26,8 +26,12 @@
 
 cc.CONTROL_ZOOM_ACTION_TAG = 0xCCCB0001;
 
-/** @class CCControlButton Button control for Cocos2D. */
-cc.ControlButton = cc.Control.extend({
+/** 
+ * CCControlButton Button control for Cocos2D. 
+ * @class
+ * @extends cc.Control
+ */
+cc.ControlButton = cc.Control.extend(/** @lends cc.ControlButton# */{
     _doesAdjustBackgroundImage:false,
     _zoomOnTouchDown:false,
     _preferredSize: null,

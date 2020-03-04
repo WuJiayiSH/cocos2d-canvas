@@ -30,7 +30,11 @@
  * converted to Javascript / cocos2d-x by Angus C
  */
 
-cc.ControlSaturationBrightnessPicker = cc.Control.extend({
+/**
+ * @class
+ * @extends cc.Control
+ */
+cc.ControlSaturationBrightnessPicker = cc.Control.extend(/** @lends cc.ControlSaturationBrightnessPicker# */{
     _saturation:0,
     _brightness:0,
 

@@ -28,8 +28,10 @@ cc.TABLEVIEW_FILL_BOTTOMUP = 1;
 
 /**
  * Abstract class for SWTableView cell node
+ * @class
+ * @extends cc.Node
  */
-cc.TableViewCell = cc.Node.extend({
+cc.TableViewCell = cc.Node.extend(/** @lends cc.TableViewCell# */{
     _idx:0,
 
     /**
@@ -59,8 +61,10 @@ cc.TableViewCell = cc.Node.extend({
 
 /**
  * Sole purpose of this delegate is to single touch event in this version.
+ * @class
+ * @extends cc.ScrollViewDelegate
  */
-cc.TableViewDelegate = cc.ScrollViewDelegate.extend({
+cc.TableViewDelegate = cc.ScrollViewDelegate.extend(/** @lends cc.TableViewDelegate# */{
     /**
      * Delegate to respond touch event
      *
@@ -105,8 +109,10 @@ cc.TableViewDelegate = cc.ScrollViewDelegate.extend({
 
 /**
  * Data source that governs table backend data.
+ * @class
+ * @extends cc.Class
  */
-cc.TableViewDataSource = cc.Class.extend({
+cc.TableViewDataSource = cc.Class.extend(/** @lends cc.TableViewDataSource# */{
     /**
      * cell size for a given index
      * @param {cc.TableView} table table to hold the instances of Class
@@ -151,8 +157,10 @@ cc.TableViewDataSource = cc.Class.extend({
  *
  * this is a very basic, minimal implementation to bring UITableView-like component into cocos2d world.
  *
+ * @class
+ * @extends cc.Class
  */
-cc.TableView = cc.ScrollView.extend({
+cc.TableView = cc.ScrollView.extend(/** @lends cc.TableView# */{
     _vOrdering:null,
     _indices:null,
     _cellsFreed:null,
@@ -338,12 +346,14 @@ cc.TableView = cc.ScrollView.extend({
     },
 
     /**
-     * delegate
+     * @return {cc.TableViewDelegate}
      */
     getDelegate:function () {
         return this._tableViewDelegate;
     },
-
+    /**
+     * @param {cc.TableViewDelegate} delegate
+     */
     setDelegate:function (delegate) {
         this._tableViewDelegate = delegate;
     },

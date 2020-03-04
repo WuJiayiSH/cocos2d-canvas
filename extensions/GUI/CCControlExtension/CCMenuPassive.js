@@ -22,7 +22,11 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-cc.Spacer = cc.Layer.extend({});
+/** 
+ * @class
+ * @extends cc.Layer
+ */
+cc.Spacer = cc.Layer.extend(/** @lends cc.Spacer# */{});
 
 cc.Spacer.verticalSpacer = function (space) {
     var pRet = new cc.Spacer();
@@ -38,7 +42,11 @@ cc.Spacer.horizontalSpacer = function (space) {
     return pRet;
 };
 
-cc.MenuPassive = cc.Layer.extend({
+/** 
+ * @class
+ * @extends cc.Layer
+ */
+cc.MenuPassive = cc.Layer.extend(/** @lends cc.MenuPassive# */{
     RGBAProtocol:true,
 
     _color:null,

@@ -41,6 +41,9 @@ cc.HSV = function(h,s,v){
     this.v = v ;     // percent
 };
 
+/** 
+ * @class
+ */
 cc.ControlUtils = {};
 
 cc.ControlUtils.addSpriteToTargetWithPosAndAnchor = function(spriteName,target,pos,anchor){

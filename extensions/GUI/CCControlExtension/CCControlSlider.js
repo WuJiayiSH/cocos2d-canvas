@@ -30,7 +30,11 @@
 cc.SLIDER_MARGIN_H = 24;
 cc.SLIDER_MARGIN_V = 8;
 
-cc.ControlSlider = cc.Control.extend({
+/**
+ * @class
+ * @extends cc.Control
+ */
+cc.ControlSlider = cc.Control.extend(/** @lends cc.ControlSlider# */{
     _value:0,
     _minimumValue:0,
     _maximumValue:0,

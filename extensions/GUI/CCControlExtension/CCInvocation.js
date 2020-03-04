@@ -22,7 +22,11 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-cc.Invocation = cc.Class.extend({
+/** 
+ * @class
+ * @extends cc.Class
+ */
+cc.Invocation = cc.Class.extend(/** @lends cc.Invocation# */{
     _action:null,
     _target:null,
     _controlEvent:null,

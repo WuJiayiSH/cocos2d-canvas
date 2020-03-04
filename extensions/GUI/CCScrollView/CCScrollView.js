@@ -42,10 +42,19 @@ cc.convertDistanceFromPointToInch = function(pointDis){
     var factor = (eglViewer.getScaleX() + eglViewer.getScaleY())/2;
     return (pointDis * factor) / 160;               // CCDevice::getDPI() default value
 };
-
-cc.ScrollViewDelegate = cc.Class.extend({
+/**
+ * @class
+ * @extends cc.Class
+ */
+cc.ScrollViewDelegate = cc.Class.extend(/** @lends cc.ScrollViewDelegate# */{
+    /**
+     * @param {cc.ScrollView} view
+     */
     scrollViewDidScroll:function (view) {
     },
+    /**
+     * @param {cc.ScrollView} view
+     */
     scrollViewDidZoom:function (view) {
     }
 });
@@ -53,8 +62,10 @@ cc.ScrollViewDelegate = cc.Class.extend({
 /**
  * ScrollView support for cocos2d -x.
  * It provides scroll view functionalities to cocos2d projects natively.
+ * @class
+ * @extends cc.Layer
  */
-cc.ScrollView = cc.Layer.extend({
+cc.ScrollView = cc.Layer.extend(/** @lends cc.ScrollView# */{
     _zoomScale:0,
     _minZoomScale:0,
     _maxZoomScale:0,
@@ -359,10 +370,15 @@ cc.ScrollView = cc.Layer.extend({
     setDirection:function (direction) {
         this._direction = direction;
     },
-
+    /**
+     * @return {cc.ScrollViewDelegate}
+     */
     getDelegate:function () {
         return this._delegate;
     },
+    /**
+     * @param {cc.ScrollViewDelegate} delegate
+     */
     setDelegate:function (delegate) {
         this._delegate = delegate;
     },

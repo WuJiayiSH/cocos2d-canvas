@@ -24,8 +24,12 @@
  * THE SOFTWARE.
  */
 
-/** @class CCControlSwitch Switch control for Cocos2D. */
-cc.ControlSwitch = cc.Control.extend({
+/** 
+ * CCControlSwitch Switch control for Cocos2D.
+ * @class
+ * @extends cc.Control
+ */
+cc.ControlSwitch = cc.Control.extend(/** @lends cc.ControlSwitch# */{
     /** Sprite which represents the view. */
     _switchSprite:null,
     _initialTouchXPosition:0,
