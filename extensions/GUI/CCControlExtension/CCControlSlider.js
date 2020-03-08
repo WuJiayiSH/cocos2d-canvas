@@ -161,8 +161,8 @@ cc.ControlSlider = cc.Control.extend(/** @lends cc.ControlSlider# */{
             this.addChild(this._thumbSprite);
 
             // Init default values
-            this._minimumValue = 0.0;
-            this._maximumValue = 1.0;
+            this._minimumValue = this._minimumAllowedValue = 0.0;
+            this._maximumValue = this._maximumAllowedValue = 1.0;
             this.setValue(this._minimumValue);
             return true;
         } else
