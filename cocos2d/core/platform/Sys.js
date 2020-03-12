@@ -59,71 +59,49 @@ sys._supportCanvasNewBlendModes = (function(){
 
 /** Capabilities
 */
-Object.defineProperties(sys,
-{
-	capabilities : {
-		get : function(){
-			var capabilities = {"canvas":true};
+sys.capabilities = function() {
+	var capabilities = {"canvas":true};
 
-			// if (window.DeviceOrientationEvent!==undefined || window.OrientationEvent!==undefined)
-			//   capabilities["accelerometer"] = true;
-            if(cc.Browser.supportWebGL)
-                capabilities["opengl"] = true;
+	// if (window.DeviceOrientationEvent!==undefined || window.OrientationEvent!==undefined)
+	//   capabilities["accelerometer"] = true;
+	// if(cc.Browser.supportWebGL)
+	// 	capabilities["opengl"] = true;
+	
+	if( document.documentElement['ontouchstart'] !== undefined || window.navigator.msPointerEnabled)
+		capabilities["touches"] = true;
 
-			if( document.documentElement['ontouchstart'] !== undefined || window.navigator.msPointerEnabled)
-				capabilities["touches"] = true;
+	else if( document.documentElement['onmouseup'] !== undefined )
+		capabilities["mouse"] = true;
 
-			else if( document.documentElement['onmouseup'] !== undefined )
-				capabilities["mouse"] = true;
+	if( document.documentElement['onkeyup'] !== undefined )
+		capabilities["keyboard"] = true;
 
-			if( document.documentElement['onkeyup'] !== undefined )
-				capabilities["keyboard"] = true;
+	if(window.DeviceMotionEvent || window.DeviceOrientationEvent)
+		capabilities["accelerometer"] = true;
 
-            if(window.DeviceMotionEvent || window.DeviceOrientationEvent)
-                capabilities["accelerometer"] = true;
+	return capabilities;
+}();
 
-			return capabilities;
-        },
-		enumerable : true,
-		configurable : true
-	},
-	os : {
-		get : function() {
-			var iOS = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/i) ? true : false );
-			var isAndroid = navigator.userAgent.match(/android/i) || navigator.platform.match(/android/i) ? true : false;
-			var OSName=navigator.appVersion;
-			if (navigator.appVersion.indexOf("Win")!=-1)
-				OSName="Windows";
-			else if( iOS )
-				OSName = "iOS";
-			else if (navigator.appVersion.indexOf("Mac")!=-1)
-				OSName="OS X";
-			else if (navigator.appVersion.indexOf("X11")!=-1)
-				OSName="UNIX";
-			else if (navigator.appVersion.indexOf("Linux")!=-1)
-				OSName="Linux";
-			else if( isAndroid )
-				OSName = "Android";
-			return OSName;
-		},
-		enumerable : true,
-		configurable : true
-	},
-	platform : {
-		get : function(){
-			return "browser";
-		},
-		enumerable : true,
-		configurable : true
-	},
-	version : {
-		get : function(){
-			return cc.ENGINE_VERSION;
-		},
-		enumerable : true,
-		configurable : true
-	}
-});
+sys.os = function() {
+	var iOS = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/i) ? true : false );
+	var isAndroid = navigator.userAgent.match(/android/i) || navigator.platform.match(/android/i) ? true : false;
+	var OSName=navigator.appVersion;
+	if (navigator.appVersion.indexOf("Win")!=-1)
+		OSName="Windows";
+	else if( iOS )
+		OSName = "iOS";
+	else if (navigator.appVersion.indexOf("Mac")!=-1)
+		OSName="OS X";
+	else if (navigator.appVersion.indexOf("X11")!=-1)
+		OSName="UNIX";
+	else if (navigator.appVersion.indexOf("Linux")!=-1)
+		OSName="Linux";
+	else if( isAndroid )
+		OSName = "Android";
+	return OSName;
+}();
+
+sys.platform = "browser";
 
 // Forces the garbage collector
 sys.garbageCollect = function() {

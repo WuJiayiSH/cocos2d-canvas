@@ -107,53 +107,15 @@ cc.c3BEqual = function(color1, color2){
 };
 
 //ccColor3B predefined colors
-Object.defineProperties(cc, {
-    WHITE: {
-        get: function () {
-            return cc.c3b(255, 255, 255);
-        }
-    },
-    YELLOW: {
-        get: function () {
-            return cc.c3b(255, 255, 0);
-        }
-    },
-    BLUE: {
-        get: function () {
-            return cc.c3b(0, 0, 255);
-        }
-    },
-    GREEN: {
-        get: function () {
-            return cc.c3b(0, 255, 0);
-        }
-    },
-    RED: {
-        get: function () {
-            return cc.c3b(255, 0, 0);
-        }
-    },
-    MAGENTA: {
-        get: function () {
-            return cc.c3b(255, 0, 255);
-        }
-    },
-    BLACK: {
-        get: function () {
-            return cc.c3b(0, 0, 0);
-        }
-    },
-    ORANGE: {
-        get: function () {
-            return cc.c3b(255, 127, 0);
-        }
-    },
-    GRAY: {
-        get: function () {
-            return cc.c3b(166, 166, 166);
-        }
-    }
-});
+cc.WHITE = cc.c3b(255, 255, 255);
+cc.YELLOW = cc.c3b(255, 255, 0);
+cc.BLUE = cc.c3b(0, 0, 255);
+cc.GREEN = cc.c3b(0, 255, 0);
+cc.RED = cc.c3b(255, 0, 0);
+cc.MAGENTA = cc.c3b(255, 0, 255);
+cc.BLACK = cc.c3b(0, 0, 0);
+cc.ORANGE = cc.c3b(255, 127, 0);
+cc.GRAY = cc.c3b(166, 166, 166);
 
 /**
  *  White color (255,255,255)

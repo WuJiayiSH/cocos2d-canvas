@@ -171,25 +171,6 @@ cc.SizeZero = function () {
     return cc.size(0, 0);
 };
 
-Object.defineProperties(cc, {
-    POINT_ZERO:{
-        get:function () {
-            return cc.p();
-        }
-    },
-    SIZE_ZERO:{
-        get:function () {
-            return cc.size(0,0);
-        }
-    },
-    RECT_ZERO:{
-        get:function () {
-            return cc.rect(0, 0, 0, 0);
-        }
-    }
-});
-
-
 /**
  * @function
  * @param {cc.Size} size1
@@ -514,6 +495,10 @@ cc.Rect.prototype.setOrigin = function(x1, y1){
     }
     throw "unknown argument type";
 };
+
+cc.POINT_ZERO = cc.p();
+cc.SIZE_ZERO = cc.size(0,0);
+cc.RECT_ZERO = cc.rect(0, 0, 0, 0);
 
 // Deprecated
 /*cc.Rect.CCRectEqualToRect = cc.rectEqualToRect;

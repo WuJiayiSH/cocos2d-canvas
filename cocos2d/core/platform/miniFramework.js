@@ -113,6 +113,9 @@ cc.Browser.multipleAudioWhiteList = ["baidubrowser", "opera", "firefox", "chrome
         var tempCanvas = cc.createCanvas();
         var tempContext = cc.create3DContext(tempCanvas, {'stencil': true, 'preserveDrawingBuffer': true });
         cc.Browser.supportWebGL = !(tempContext == null)
+        if (cc.Browser.supportWebGL) {
+            sys.capabilities["opengl"] = true;
+        }
     }
     if (cc._userRenderMode === 2 && !cc.Browser.supportWebGL) {
         // WebGL render only, but browser doesn't support WebGL.

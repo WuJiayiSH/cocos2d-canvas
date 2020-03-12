@@ -1274,7 +1274,7 @@ cc.Director.getInstance = function () {
     }
     return cc.s_SharedDirector;
 };
-
+/*
 Object.defineProperties(cc, {
     windowSize: {
         get: function () {
@@ -1283,7 +1283,7 @@ Object.defineProperties(cc, {
         enumerable: true
     }
 });
-
+*/
 /**
  * is director first run
  * @type Boolean
