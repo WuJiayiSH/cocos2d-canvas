@@ -2407,3 +2407,312 @@ cc.NodeRGBA.create = function () {
     res.init();
     return res;
 };
+
+/**
+ * position type
+ * @type {Object}
+ */
+cc.PositionType = {
+    ignore: -1,
+    absolute: 0,
+    percent: 1
+};
+/** 
+ * @class
+ * @extends cc.NodeWidget
+ */
+cc.NodeWidget = cc.Node.extend(/** @lends cc.NodeWidget# */{
+    _topTypeInParent: cc.PositionType.ignore,
+    _topValueInParent: 0,
+
+    _bottomTypeInParent: cc.PositionType.ignore,
+    _bottomValueInParent: 0,
+
+    _leftTypeInParent: cc.PositionType.ignore,
+    _leftValueInParent: 0,
+
+    _rightTypeInParent: cc.PositionType.ignore,
+    _rightValueInParent: 0,
+
+    _centerVerticalTypeInParent: cc.PositionType.ignore,
+    _centerVerticalValueInParent: 0,
+
+    _centerHorizontalTypeInParent: cc.PositionType.ignore,
+    _centerHorizontalValueInParent: 0,
+
+    ctor: function () {
+        cc.Node.prototype.ctor.call(this);
+    },
+
+    /**
+     *
+     * @return {Boolean}
+     */
+    init: function () {
+        cc.Node.prototype.init.call(this);
+        return true;
+    },
+
+    /**
+     * @param {cc.PositionType} type
+     * @param {number} value
+     */
+    setTopInParent(type, value) {
+        this._topTypeInParent = type;
+        if (type >= 0) {
+            this._centerVerticalTypeInParent = cc.PositionType.ignore;
+        }
+        if (typeof (value) == "number") {
+            this._topValueInParent = value;
+            this.needsLayout();
+        } else {
+            this._updateValues();
+        }
+    },
+
+    /**
+     * @param {cc.PositionType} type
+     * @param {number} value
+     */
+    setBottomInParent(type, value) {
+        this._bottomTypeInParent = type;
+        if (type >= 0) {
+            this._centerVerticalTypeInParent = cc.PositionType.ignore;
+        }
+        if (typeof (value) == "number") {
+            this._bottomValueInParent = value;
+            this.needsLayout();
+        } else {
+            this._updateValues();
+        }
+    },
+
+    /**
+     * @param {cc.PositionType} type
+     * @param {number} value
+     */
+    setLeftInParent(type, value) {
+        this._leftTypeInParent = type;
+        if (type >= 0) {
+            this._centerHorizontalTypeInParent = cc.PositionType.ignore;
+        }
+        if (typeof (value) == "number") {
+            this._leftValueInParent = value;
+            this.needsLayout();
+        } else {
+            this._updateValues();
+        }
+    },
+
+    /**
+     * @param {cc.PositionType} type
+     * @param {number} value
+     */
+    setRightInParent(type, value) {
+        this._rightTypeInParent = type;
+        if (type >= 0) {
+            this._centerHorizontalTypeInParent = cc.PositionType.ignore;
+        }
+        if (typeof (value) == "number") {
+            this._rightValueInParent = value;
+            this.needsLayout();
+        } else {
+            this._updateValues();
+        }
+    },
+
+    /**
+     * @param {cc.PositionType} type
+     * @param {number} value
+     */
+    setCenterHorizontalInParent(type, value) {
+        this._centerHorizontalTypeInParent = type;
+        if (type >= 0) {
+            this._leftTypeInParent = this._rightTypeInParent = cc.PositionType.ignore;
+        }
+        if (typeof (value) == "number") {
+            this._centerHorizontalValueInParent = value;
+            this.needsLayout();
+        } else {
+            this._updateValues();
+        }
+    },
+
+    /**
+     * @param {cc.PositionType} type
+     * @param {number} value
+     */
+    setCenterVerticalInParent(type, value) {
+        this._centerVerticalTypeInParent = type;
+        if (type >= 0) {
+            this._bottomTypeInParent = this._topTypeInParent = cc.PositionType.ignore;
+        }
+        if (typeof (value) == "number") {
+            this._centerVerticalValueInParent = value;
+            this.needsLayout();
+        } else {
+            this._updateValues();
+        }
+
+    },
+    _updateValues() {
+        if (!this.getParent()) {
+            return;
+        }
+        var pContentSize = this.getParent().getContentSize();
+        var anchorPoint = this._anchorPoint;
+        if (this.isIgnoreAnchorPointForPosition()) {
+            anchorPoint.x = 0;
+            anchorPoint.y = 0;
+        }
+
+        if (this._leftTypeInParent >= 0) {
+            var left = this.getPositionX();
+            left -= this._contentSize.width * anchorPoint.x;
+            if (this._leftTypeInParent == cc.PositionType.absolute) {
+                this._leftValueInParent = left
+            } else if (pContentSize.width != 0) {
+                this._leftValueInParent = left / pContentSize.width;
+            } else {
+                this._leftValueInParent = 0;
+            }
+
+            if (this._rightTypeInParent >= 0) {
+                var right = left + this._contentSize.width;
+                if (this._rightTypeInParent == cc.PositionType.absolute) {
+                    this._rightValueInParent = pContentSize.width - right
+                } else if (pContentSize.width != 0) {
+                    this._rightValueInParent = (pContentSize.width - right) / pContentSize.width;
+                } else {
+                    this._rightValueInParent = 0;
+                }
+            }
+        } else if (this._rightTypeInParent >= 0) {
+            var right = this.getPositionX();
+            right -= this._contentSize.width * (anchorPoint.x - 1);
+            if (this._rightTypeInParent == cc.PositionType.absolute) {
+                this._rightValueInParent = pContentSize.width - right
+            } else if (pContentSize.width != 0) {
+                this._rightValueInParent = (pContentSize.width - right) / pContentSize.width;
+            } else {
+                this._rightValueInParent = 0;
+            }
+        } else if (this._centerHorizontalTypeInParent >= 0) {
+            var left = this.getPositionX();
+            left -= this._contentSize.width * (anchorPoint.x - 0.5);
+            if (this._centerHorizontalTypeInParent == cc.PositionType.absolute) {
+                this._centerHorizontalValueInParent = left - pContentSize.width * 0.5
+            } else if (pContentSize.width != 0) {
+                this._centerHorizontalValueInParent = (left - pContentSize.width * 0.5) / pContentSize.width
+            } else {
+                this._centerHorizontalValueInParent = 0;
+            }
+        }
+
+        if (this._bottomTypeInParent >= 0) {
+            var bottom = this.getPositionY();
+            bottom -= this._contentSize.height * anchorPoint.y;
+            if (this._bottomTypeInParent == cc.PositionType.absolute) {
+                this._bottomValueInParent = bottom
+            } else if (pContentSize.height != 0) {
+                this._bottomValueInParent = bottom / pContentSize.height;
+            } else {
+                this._bottomValueInParent = 0;
+            }
+
+            if (this._topTypeInParent >= 0) {
+                var top = bottom + this._contentSize.height;
+                if (this._topTypeInParent == cc.PositionType.absolute) {
+                    this._topValueInParent = pContentSize.height - top
+                } else if (pContentSize.height != 0) {
+                    this._topValueInParent = (pContentSize.height - top) / pContentSize.height;
+                } else {
+                    this._topValueInParent = 0;
+                }
+            }
+        } else if (this._topTypeInParent >= 0) {
+            var top = this.getPositionY();
+            top -= this._contentSize.height * (anchorPoint.y - 1);
+            if (this._topTypeInParent == cc.PositionType.absolute) {
+                this._topValueInParent = pContentSize.height - top
+            } else if (pContentSize.height != 0) {
+                this._topValueInParent = (pContentSize.height - top) / pContentSize.height;
+            } else {
+                this._topValueInParent = 0;
+            }
+        } else if (this._centerVerticalTypeInParent >= 0) {
+            var bottom = this.getPositionY();
+            bottom -= this._contentSize.height * (anchorPoint.y - 0.5);
+            if (this._centerVerticalTypeInParent == cc.PositionType.absolute) {
+                this._centerVerticalValueInParent = bottom - pContentSize.height * 0.5
+            } else if (pContentSize.height != 0) {
+                this._centerVerticalValueInParent = (bottom - pContentSize.height * 0.5) / pContentSize.height
+            } else {
+                this._centerVerticalValueInParent = 0;
+            }
+        }
+    },
+    needsLayout: function () {
+        if (!this.getParent()) {
+            return;
+        }
+        var pContentSize = this.getParent().getContentSize();
+        var anchorPoint = this._anchorPoint;
+        if (this.isIgnoreAnchorPointForPosition()) {
+            anchorPoint.x = 0;
+            anchorPoint.y = 0;
+        }
+        if (this._leftTypeInParent >= 0) {
+            var left = this._leftTypeInParent == cc.PositionType.absolute ?
+                this._leftValueInParent : this._leftValueInParent * pContentSize.width;
+            if (this._rightTypeInParent >= 0) {
+                var right = this._rightTypeInParent == cc.PositionType.absolute ?
+                    pContentSize.width - this._rightValueInParent : pContentSize.width - this._rightValueInParent * pContentSize.width;
+                this.setContentSize(cc.size(right - left, this._contentSize.height));
+            }
+            this.setPositionX(left + this._contentSize.width * anchorPoint.x)
+        } else if (this._rightTypeInParent >= 0) {
+            var right = this._rightTypeInParent == cc.PositionType.absolute ?
+                pContentSize.width - this._rightValueInParent : pContentSize.width - this._rightValueInParent * pContentSize.width;
+            this.setPositionX(right + this._contentSize.width * (anchorPoint.x - 1))
+        } else if (this._centerHorizontalTypeInParent >= 0) {
+            var left = this._centerHorizontalTypeInParent == cc.PositionType.absolute ?
+                pContentSize.width * 0.5 + this._centerHorizontalValueInParent : (this._centerHorizontalValueInParent + 0.5) * pContentSize.width;
+            this.setPositionX(left + this._contentSize.width * (anchorPoint.x - 0.5))
+        }
+
+        if (this._bottomTypeInParent >= 0) {
+            var bottom = this._bottomTypeInParent == cc.PositionType.absolute ?
+                this._bottomValueInParent : this._bottomValueInParent * pContentSize.height;
+            if (this._topTypeInParent >= 0) {
+                var top = this._topTypeInParent == cc.PositionType.absolute ?
+                    pContentSize.height - this._topValueInParent : pContentSize.height - this._topValueInParent * pContentSize.height;
+                this.setContentSize(cc.size(this._contentSize.width, top - bottom));
+            }
+            this.setPositionY(bottom + this._contentSize.height * anchorPoint.y)
+        } else if (this._topTypeInParent >= 0) {
+            var top = this._topTypeInParent == cc.PositionType.absolute ?
+                pContentSize.height - this._topValueInParent : pContentSize.height - this._topValueInParent * pContentSize.height;
+            this.setPositionY(top + this._contentSize.height * (anchorPoint.y - 1))
+        } else if (this._centerVerticalTypeInParent >= 0) {
+            var bottom = this._centerVerticalTypeInParent == cc.PositionType.absolute ?
+                pContentSize.height * 0.5 + this._centerVerticalValueInParent : (this._centerVerticalValueInParent + 0.5) * pContentSize.height;
+            this.setPositionY(bottom + this._contentSize.height * (anchorPoint.y - 0.5))
+        }
+    }
+});
+
+/**
+ * allocates and initializes a widget.
+ * @constructs
+ * @return {cc.NodeWidget}
+ * @example
+ * // example
+ * var widget = cc.NodeWidget.create();
+ */
+cc.NodeWidget.create = function () {
+    var ret = new cc.NodeWidget();
+    if (ret && ret.init())
+        return ret;
+    return null;
+};
