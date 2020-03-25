@@ -53,6 +53,7 @@ sp.Skeleton = cc.NodeRGBA.extend({
     _ownsSkeletonData: null,
     _atlas: null,
     _blendFunc: null,
+    _renderer: null,
     ctor:function(){
         cc.NodeRGBA.prototype.ctor.call(this);
         this._blendFunc = {src: cc.BLEND_SRC, dst: cc.BLEND_DST};
@@ -62,18 +63,43 @@ sp.Skeleton = cc.NodeRGBA.extend({
         this.setOpacityModifyRGB(true);
         this._blendFunc.src = gl.ONE;
         this._blendFunc.dst = gl.ONE_MINUS_SRC_ALPHA;
-        if(cc.renderContextType === cc.WEBGL)
-            this.setShaderProgram(cc.ShaderCache.getInstance().programForKey(cc.SHADER_POSITION_TEXTURECOLOR));
+        this._renderer = new spine.canvas.SkeletonRenderer(cc.renderContext);
         this.scheduleUpdate();
     },
+
+    /**
+     * @deprecated use setDebugRendering
+     * @param {Boolean} v
+     */
     setDebugSolots:function(v){
         this._debugSlots = v;
     },
 
+    /**
+     * @deprecated use setDebugRendering
+     * @param {Boolean} v
+     */
     setDebugBones:function(v){
         this._debugBones = v;
     },
 
+    /**
+     * @param {Boolean} v
+     */
+    setDebugRendering:function(v){
+        this._renderer.debugRendering = v;
+    },
+
+    /**
+     * @param {Boolean} v
+     */
+    setTriangleRendering:function(v){
+        this._renderer.triangleRendering = v;
+    },
+
+    /**
+     * @param {Number} v
+     */
     setTimeScale:function(v){
         this._timeScale = v;
     },
@@ -86,8 +112,11 @@ sp.Skeleton = cc.NodeRGBA.extend({
         if (typeof argSkeletonFile == 'string') {
             if (typeof argAtlasFile == 'string') {
                 var data = fileUtils.getTextFileData(argAtlasFile);
-                sp._atlasLoader.setAtlasFile(argAtlasFile);
-                atlas = new spine.Atlas(data, sp._atlasLoader);
+                atlas = new spine.TextureAtlas(data, function(path) {
+                    var texturePath = cc.FileUtils.getInstance().fullPathFromRelativeFile(path, argAtlasFile);
+                    var texture = cc.TextureCache.getInstance().addImage(texturePath);
+                    return new spine.canvas.CanvasTexture(texture.getHtmlElementObj());
+                });
             } else {
                 atlas = arguments[1];
             }
@@ -163,24 +192,9 @@ sp.Skeleton = cc.NodeRGBA.extend({
     },
     setSkeletonData: function (skeletonData, ownsSkeletonData) {
         this._skeleton = new spine.Skeleton(skeletonData);
+        this._skeleton.scaleY = -1;
         this._rootBone = this._skeleton.getRootBone();
         this._ownsSkeletonData = ownsSkeletonData;
-
-        if(cc.renderContextType === cc.CANVAS){
-            var locSkeleton = this._skeleton, rendererObject, rect;
-            for (var i = 0, n = locSkeleton.drawOrder.length; i < n; i++) {
-                var slot = locSkeleton.drawOrder[i];
-                var attachment = slot.attachment;
-                if (!(attachment instanceof spine.RegionAttachment)) {
-                    continue;
-                }
-                rendererObject = attachment.rendererObject;
-                rect = cc.rect(rendererObject.x, rendererObject.y, rendererObject.width,rendererObject.height);
-                var sprite = cc.Sprite.createWithTexture(rendererObject.page._texture, rect, rendererObject.rotate);
-                this.addChild(sprite,-1);
-                slot.currentSprite = sprite;
-            }
-        }
     },
 
     getTextureAtlas: function (regionAttachment) {
@@ -198,169 +212,10 @@ sp.Skeleton = cc.NodeRGBA.extend({
 
     update: function (dt) {
         this._skeleton.update(dt);
-
-        if (cc.renderContextType === cc.CANVAS) {
-            var color = this.getColor(), locSkeleton = this._skeleton;
-            locSkeleton.updateWorldTransform();
-            locSkeleton.r = color.r / 255;
-            locSkeleton.g = color.g / 255;
-            locSkeleton.b = color.b / 255;
-            locSkeleton.a = this.getOpacity() / 255;
-            if (this._premultipliedAlpha) {
-                locSkeleton.r *= locSkeleton.a;
-                locSkeleton.g *= locSkeleton.a;
-                locSkeleton.b *= locSkeleton.a;
-            }
-            var drawOrder = this._skeleton.drawOrder, r, g, b, a, normalizedAlpha;
-            for (var i = 0, n = drawOrder.length; i < n; i++) {
-                var slot = drawOrder[i];
-                var attachment = slot.attachment, selSprite = slot.currentSprite;
-                if (!(attachment instanceof spine.RegionAttachment)) {
-                    if(selSprite)
-                        selSprite.setVisible(false);
-                    continue;
-                }
-                if(!selSprite){
-                    var rendererObject = attachment.rendererObject;
-                    var rect = cc.rect(rendererObject.x, rendererObject.y, rendererObject.width,rendererObject.height);
-                    var sprite = cc.Sprite.createWithTexture(rendererObject.page._texture, rect, rendererObject.rotate);
-                    this.addChild(sprite,-1);
-                    slot.currentSprite = sprite;
-                }
-                selSprite.setVisible(true);
-                //update color and blendFunc
-                selSprite.setBlendFunc(cc.BLEND_SRC, slot.data.additiveBlending ? gl.ONE : cc.BLEND_DST);
-
-                r = slot.skeleton.r * slot.r * 255;
-                g = slot.skeleton.g * slot.g * 255;
-                b = slot.skeleton.b * slot.b * 255;
-                normalizedAlpha = slot.skeleton.a * slot.a;
-                if (this._premultipliedAlpha) {
-                    r *= normalizedAlpha;
-                    g *= normalizedAlpha;
-                    b *= normalizedAlpha;
-                }
-                selSprite.setColor(cc.c3b(r,g,b));
-                a = normalizedAlpha * 255;
-                selSprite.setOpacity(a);
-
-                var bone = slot.bone;
-                selSprite.setPosition(bone.worldX + attachment.x * bone.m00 + attachment.y * bone.m01,
-                    bone.worldY + attachment.x * bone.m10 + attachment.y * bone.m11);
-                selSprite.setScale(bone.worldScaleX, bone.worldScaleY);
-                selSprite.setRotation(- (slot.bone.worldRotation + attachment.rotation));
-            }
-        }
     },
 
-    draw: null,
-
-    _drawForWebGL: function () {
-        cc.NODE_DRAW_SETUP(this);
-//        cc.glBlendFunc(this._blendFunc.src, this._blendFunc.dst);
-        var color = this.getColor(), locSkeleton = this._skeleton;
-        locSkeleton.r = color.r / 255;
-        locSkeleton.g = color.g / 255;
-        locSkeleton.b = color.b / 255;
-        locSkeleton.a = this.getOpacity() / 255;
-        if (this._premultipliedAlpha) {
-            locSkeleton.r *= locSkeleton.a;
-            locSkeleton.g *= locSkeleton.a;
-            locSkeleton.b *= locSkeleton.a;
-        }
-
-        var additive,textureAtlas,attachment,slot, i, n,
-            quad = new cc.V3F_C4B_T2F_Quad();
-        var locBlendFunc = this._blendFunc;
-
-        for (i = 0, n = locSkeleton.slots.length; i < n; i++) {
-            slot = locSkeleton.drawOrder[i];
-            if (!slot.attachment || slot.attachment.type != sp.ATTACHMENT_TYPE.REGION)
-                continue;
-            attachment = slot.attachment;
-            var regionTextureAtlas = this.getTextureAtlas(attachment);
-
-            if (slot.data.additiveBlending != additive) {
-                if (textureAtlas) {
-                    textureAtlas.drawQuads();
-                    textureAtlas.removeAllQuads();
-                }
-                additive = !additive;
-                cc.glBlendFunc(locBlendFunc.src, additive ? gl.ONE : locBlendFunc.dst);
-            } else if (regionTextureAtlas != textureAtlas && textureAtlas) {
-                textureAtlas.drawQuads();
-                textureAtlas.removeAllQuads();
-            }
-            textureAtlas = regionTextureAtlas;
-
-            var quadCount = textureAtlas.getTotalQuads();
-            if (textureAtlas.getCapacity() == quadCount) {
-                textureAtlas.drawQuads();
-                textureAtlas.removeAllQuads();
-                if (!textureAtlas.resizeCapacity(textureAtlas.getCapacity() * 2))
-                    return;
-            }
-
-            sp._regionAttachment_updateQuad(attachment, slot, quad, this._premultipliedAlpha);
-            textureAtlas.updateQuad(quad, quadCount);
-        }
-
-        if (textureAtlas) {
-            textureAtlas.drawQuads();
-            textureAtlas.removeAllQuads();
-        }
-
-        var drawingUtil = cc.drawingUtil;
-        if (this._debugSlots) {
-            // Slots.
-            drawingUtil.setDrawColor4B(0, 0, 255, 255);
-            drawingUtil.setLineWidth(1);
-
-            for (i = 0, n = locSkeleton.slots.length; i < n; i++) {
-                slot = locSkeleton.drawOrder[i];
-                if (!slot.attachment || slot.attachment.type != sp.ATTACHMENT_TYPE.REGION)
-                    continue;
-                attachment = slot.attachment;
-                quad = new cc.V3F_C4B_T2F_Quad();
-                sp._regionAttachment_updateQuad(attachment, slot, quad);
-
-                var points = [];
-                points.push(cc.p(quad.bl.vertices.x, quad.bl.vertices.y));
-                points.push(cc.p(quad.br.vertices.x, quad.br.vertices.y));
-                points.push(cc.p(quad.tr.vertices.x, quad.tr.vertices.y));
-                points.push(cc.p(quad.tl.vertices.x, quad.tl.vertices.y));
-                drawingUtil.drawPoly(points, 4, true);
-            }
-        }
-
-        if (this._debugBones) {
-            // Bone lengths.
-            var bone;
-            drawingUtil.setLineWidth(2);
-            drawingUtil.setDrawColor4B(255, 0, 0, 255);
-
-            for (i = 0, n = locSkeleton.bones.length; i < n; i++) {
-                bone = locSkeleton.bones[i];
-                var x = bone.data.length * bone.m00 + bone.worldX;
-                var y = bone.data.length * bone.m10 + bone.worldY;
-                drawingUtil.drawLine(cc.p(bone.worldX, bone.worldY), cc.p(x, y));
-            }
-
-            // Bone origins.
-            drawingUtil.setPointSize(4);
-            drawingUtil.setDrawColor4B(0, 0, 255, 255); // Root bone is blue.
-
-            for (i = 0, n = locSkeleton.bones.length; i < n; i++) {
-                bone = locSkeleton.bones[i];
-                drawingUtil.drawPoint(cc.p(bone.worldX, bone.worldY));
-                if (i == 0) {
-                    drawingUtil.setDrawColor4B(0, 255, 0, 255);
-                }
-            }
-        }
-    },
-
-    _drawForCanvas: function (ctx) {
+    draw: function (ctx) {
+        this._renderer.draw(this._skeleton);
         if(!this._debugSlots && !this._debugBones){
             return;
         }
@@ -408,12 +263,6 @@ sp.Skeleton = cc.NodeRGBA.extend({
         }
     }
 });
-
-if(cc.Browser.supportWebGL){
-    sp.Skeleton.prototype.draw = sp.Skeleton.prototype._drawForWebGL;
-}else{
-    sp.Skeleton.prototype.draw = sp.Skeleton.prototype._drawForCanvas;
-}
 
 sp.Skeleton.createWithData = function (skeletonData, ownsSkeletonData) {
     var c = new sp.Skeleton();

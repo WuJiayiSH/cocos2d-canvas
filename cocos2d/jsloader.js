@@ -259,7 +259,7 @@
             '../extensions/CocoStudio/Reader/SceneReader.js',
 
             //spine
-            '../extensions/Spine/Spine.js',
+            '../extensions/Spine/spine-canvas.js',
             '../extensions/Spine/CCSkeleton.js',
             '../extensions/Spine/CCSkeletonAnimation.js'
         ]);

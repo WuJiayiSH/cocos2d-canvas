@@ -24,38 +24,6 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-sp._atlasPage_createTexture_webGL = function (self, path) {
-    var texture = cc.TextureCache.getInstance().addImage(path);
-    self.rendererObject = cc.TextureAtlas.createWithTexture(texture, 128);
-    self.width = texture.getPixelsWide();
-    self.height = texture.getPixelsHigh();
-};
-
-sp._atlasPage_createTexture_canvas = function(self, path) {
-    self._texture = cc.TextureCache.getInstance().addImage(path);
-};
-
-sp._atlasPage_disposeTexture = function (self) {
-    self.rendererObject.release();
-};
-
-sp._atlasLoader = {
-    spAtlasFile:null,
-    setAtlasFile:function(spAtlasFile){
-        this.spAtlasFile = spAtlasFile;
-    },
-    load:function(page, line, spAtlas){
-        var texturePath = cc.FileUtils.getInstance().fullPathFromRelativeFile(line, this.spAtlasFile);
-        if(cc.renderContextType === cc.WEBGL)
-            sp._atlasPage_createTexture_webGL(page,texturePath);
-        else
-            sp._atlasPage_createTexture_canvas(page,texturePath);
-    },
-    unload:function(obj){
-
-    }
-};
-
 sp.regionAttachment_computeWorldVertices = function(self, x, y, bone, vertices){
     var offset = self.offset;
     x += bone.worldX;
@@ -164,7 +132,7 @@ sp.SkeletonAnimation = sp.Skeleton.extend({
             cc.log("Spine: Animation not found: " + name);
             return 0;
         }
-        return this._state.setAnimation(trackIndex, animation, loop);
+        return this._state.setAnimationWith(trackIndex, animation, loop);
     },
     addAnimation: function (trackIndex, name, loop, delay) {
         var animation = this._skeleton.data.findAnimation(name);
