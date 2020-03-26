@@ -467,4 +467,14 @@ cc.Application.getCurrentLanguage = function () {
     return ret;
 };
 
+/**
+ * Get current language code
+ * @return {String} Current language code
+ */
+cc.Application.getCurrentLanguageCode = function () {
+    var currentLang = navigator.language || navigator.browserLanguage || navigator.userLanguage;
+    return currentLang ? currentLang.toLowerCase() : "";
+};
+
+
 cc._sharedApplication = null;
