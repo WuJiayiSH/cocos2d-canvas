@@ -1348,6 +1348,19 @@ if (!cc.Browser.supportWebGL) {
 //cc.LayerColor define end
     _p = null;
 }
+
+/** Linear gradient 
+ * @type Number
+ * @constant
+ */
+cc.GRADIENT_TYPE_LINEAR = 0;
+
+/** Radial gradient
+ * @type Number
+ * @constant
+ */
+cc.GRADIENT_TYPE_RADIAL = 1;
+
 /**
  * <p>
  * CCLayerGradient is a subclass of cc.LayerColor that draws gradients across the background.<br/>
@@ -1375,11 +1388,15 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
     _endColor:null,
     _startOpacity:null,
     _endOpacity:null,
+    _startRadius:null,
+    _endRadius:null,
     _alongVector:null,
     _compressedInterpolation:false,
     _gradientStartPoint:null,
     _gradientEndPoint:null,
-
+    _type: null,
+    _colorStops: null,
+    
     /**
      * Constructor
      * @function
@@ -1392,8 +1409,12 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
         this._alongVector = cc.p(0, -1);
         this._startOpacity = 255;
         this._endOpacity = 255;
+        this._startRadius = 0;
+        this._endRadius = 0;
         this._gradientStartPoint = cc.p(0, 0);
         this._gradientEndPoint = cc.p(0, 0);
+        this._type = cc.GRADIENT_TYPE_LINEAR;
+        this._colorStops = [];
     },
 
     /**
@@ -1405,6 +1426,22 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
     setContentSize:function(size, height){
 	    cc.LayerColor.prototype.setContentSize.call(this,size, height);
         this._updateColor();
+    },
+
+    /**
+     * add a color stop
+     * @param {Number} offset from 0 to 1
+     * @param {cc.Color4B} color
+     */
+    addColorStop:function (offset, color) {
+        this._colorStops.push([offset, color])
+    },
+
+    /**
+     * remove all the color stops
+     */
+    removeAllColorStops:function () {
+        this._colorStops.length = 2;
     },
 
     /**
@@ -1424,6 +1461,9 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
      * //set the starting gradient to red
      */
     setStartColor:function (color) {
+        this._colorStops[0].r = color.r;
+        this._colorStops[0].g = color.g;
+        this._colorStops[0].b = color.b;
         this.setColor(color);
     },
 
@@ -1436,6 +1476,9 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
      * //set the ending gradient to red
      */
     setEndColor:function (color) {
+        this._colorStops[1].r = color.r;
+        this._colorStops[1].g = color.g;
+        this._colorStops[1].b = color.b;
         this._endColor = color;
         this._updateColor();
     },
@@ -1453,6 +1496,7 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
      * @param {Number} o from 0 to 255, 0 is transparent
      */
     setStartOpacity:function (o) {
+        this._colorStops[0].a = o;
         this._startOpacity = o;
         this._updateColor();
     },
@@ -1470,6 +1514,7 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
      * @param {Number} o
      */
     setEndOpacity:function (o) {
+        this._colorStops[1].a = o;
         this._endOpacity = o;
         this._updateColor();
     },
@@ -1480,6 +1525,38 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
      */
     getEndOpacity:function () {
         return this._endOpacity;
+    },
+
+    /**
+     * set starting gradient radius
+     * @param {Number} r
+     */
+    setStartRadius:function (r) {
+        this._startRadius = r;
+    },
+
+    /**
+     * get the starting gradient radius
+     * @return {Number}
+     */
+    getStartRadius:function () {
+        return this._startRadius;
+    },
+
+    /**
+     * set the end gradient radius
+     * @param {Number} r
+     */
+    setEndRadius:function (r) {
+        this._endRadius = r;
+    },
+
+    /**
+     * get the end gradient radius
+     * @return {Number}
+     */
+    getEndRadius:function () {
+        return this._endRadius;
     },
 
     /**
@@ -1515,6 +1592,14 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
     },
 
     /**
+     * @param {cc.GRADIENT_TYPE_LINEAR|cc.GRADIENT_TYPE_RADIAL} type
+     */
+    setType:function (type) {
+        if (type !== this._type)
+            this._type = type;
+    },
+
+    /**
      * @param {cc.Color4B} start starting color
      * @param {cc.Color4B} end
      * @param {cc.Point|Null} v
@@ -1537,6 +1622,9 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
         locEndColor.b = end.b;
         this._endOpacity = end.a;
 
+        this.addColorStop(0, start);
+        this.addColorStop(1, end);
+
         this._alongVector = v;
         this._compressedInterpolation = true;
 
@@ -1558,15 +1646,23 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
         var locEGLViewer = cc.EGLView.getInstance(),opacityf = this._displayedOpacity / 255.0;
         var scaleX = locEGLViewer.getScaleX(), scaleY = locEGLViewer.getScaleY();
         var tWidth = this.getContentSize().width * scaleX, tHeight = this.getContentSize().height * scaleY;
-        var tGradient = context.createLinearGradient(this._gradientStartPoint.x * scaleX, this._gradientStartPoint.y * scaleY,
-            this._gradientEndPoint.x * scaleX, this._gradientEndPoint.y * scaleY);
+        
+        var tGradient = null;
+        if (this._type === cc.GRADIENT_TYPE_LINEAR) {
+            tGradient = context.createLinearGradient(this._gradientStartPoint.x * scaleX, this._gradientStartPoint.y * scaleY,
+                this._gradientEndPoint.x * scaleX, this._gradientEndPoint.y * scaleY);
+        } else {
+            tGradient = context.createRadialGradient(tWidth * this._anchorPoint.x, -tHeight * this._anchorPoint.y, this._startRadius,
+                tWidth * this._anchorPoint.x, -tHeight * this._anchorPoint.y, this._endRadius);
+        }
 
-        var locDisplayedColor = this._displayedColor;
-        var locEndColor = this._endColor;
-        tGradient.addColorStop(0, "rgba(" + Math.round(locDisplayedColor.r) + "," + Math.round(locDisplayedColor.g) + ","
-            + Math.round(locDisplayedColor.b) + "," + (opacityf * (this._startOpacity / 255)).toFixed(4) + ")");
-        tGradient.addColorStop(1, "rgba(" + Math.round(locEndColor.r) + "," + Math.round(locEndColor.g) + ","
-            + Math.round(locEndColor.b) + "," + (opacityf * (this._endOpacity / 255)).toFixed(4) + ")");
+        for(var i = 0; i < this._colorStops.length; i++) {
+            var stopOffset = this._colorStops[i][0];
+            var stopColor = this._colorStops[i][1];
+            tGradient.addColorStop(stopOffset, "rgba(" + Math.round(stopColor.r) + "," + Math.round(stopColor.g) + ","
+            + Math.round(stopColor.b) + "," + (opacityf * (stopColor.a / 255)).toFixed(4) + ")");
+        }
+
         context.fillStyle = tGradient;
         context.fillRect(0, 0, tWidth, -tHeight);
 
@@ -1577,58 +1673,13 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
 
     _updateColor:function () {
         var locAlongVector = this._alongVector;
-        if (cc.renderContextType === cc.CANVAS) {
-            var tWidth = this.getContentSize().width * 0.5;
-            var tHeight = this.getContentSize().height * 0.5;
+        var tWidth = this.getContentSize().width * 0.5;
+        var tHeight = this.getContentSize().height * 0.5;
 
-            this._gradientStartPoint.x = tWidth * (-locAlongVector.x) + tWidth;
-            this._gradientStartPoint.y = tHeight * locAlongVector.y - tHeight;
-            this._gradientEndPoint.x = tWidth * locAlongVector.x + tWidth;
-            this._gradientEndPoint.y = tHeight * (-locAlongVector.y) - tHeight;
-        } else {
-            var h = cc.pLength(locAlongVector);
-            if (h === 0)
-                return;
-
-            var c = Math.sqrt(2.0);
-            var u = cc.p(locAlongVector.x / h, locAlongVector.y / h);
-
-            // Compressed Interpolation mode
-            if (this._compressedInterpolation) {
-                var h2 = 1 / ( Math.abs(u.x) + Math.abs(u.y) );
-                u = cc.pMult(u, h2 * c);
-            }
-
-            var opacityf = this._displayedOpacity / 255.0;
-            var locDisplayedColor = this._displayedColor, locEndColor = this._endColor;
-            var S = { r: locDisplayedColor.r / 255, g: locDisplayedColor.g / 255, b: locDisplayedColor.b / 255, a: (this._startOpacity * opacityf) / 255};
-            var E = {r: locEndColor.r / 255, g: locEndColor.g / 255, b: locEndColor.b / 255, a: (this._endOpacity * opacityf) / 255};
-
-            // (-1, -1)
-            var locSquareColors = this._squareColors;
-            var locSquareColor0 = locSquareColors[0], locSquareColor1 = locSquareColors[1], locSquareColor2 = locSquareColors[2],locSquareColor3 = locSquareColors[3];
-            locSquareColor0.r = ((E.r + (S.r - E.r) * ((c + u.x + u.y) / (2.0 * c))));
-            locSquareColor0.g = ((E.g + (S.g - E.g) * ((c + u.x + u.y) / (2.0 * c))));
-            locSquareColor0.b = ((E.b + (S.b - E.b) * ((c + u.x + u.y) / (2.0 * c))));
-            locSquareColor0.a = ((E.a + (S.a - E.a) * ((c + u.x + u.y) / (2.0 * c))));
-            // (1, -1)
-            locSquareColor1.r = ((E.r + (S.r - E.r) * ((c - u.x + u.y) / (2.0 * c))));
-            locSquareColor1.g = ((E.g + (S.g - E.g) * ((c - u.x + u.y) / (2.0 * c))));
-            locSquareColor1.b = ((E.b + (S.b - E.b) * ((c - u.x + u.y) / (2.0 * c))));
-            locSquareColor1.a = ((E.a + (S.a - E.a) * ((c - u.x + u.y) / (2.0 * c))));
-            // (-1, 1)
-            locSquareColor2.r = ((E.r + (S.r - E.r) * ((c + u.x - u.y) / (2.0 * c))));
-            locSquareColor2.g = ((E.g + (S.g - E.g) * ((c + u.x - u.y) / (2.0 * c))));
-            locSquareColor2.b = ((E.b + (S.b - E.b) * ((c + u.x - u.y) / (2.0 * c))));
-            locSquareColor2.a = ((E.a + (S.a - E.a) * ((c + u.x - u.y) / (2.0 * c))));
-            // (1, 1)
-            locSquareColor3.r = ((E.r + (S.r - E.r) * ((c - u.x - u.y) / (2.0 * c))));
-            locSquareColor3.g = ((E.g + (S.g - E.g) * ((c - u.x - u.y) / (2.0 * c))));
-            locSquareColor3.b = ((E.b + (S.b - E.b) * ((c - u.x - u.y) / (2.0 * c))));
-            locSquareColor3.a = ((E.a + (S.a - E.a) * ((c - u.x - u.y) / (2.0 * c))));
-
-            this._bindLayerColorsBufferData();
-        }
+        this._gradientStartPoint.x = tWidth * (-locAlongVector.x) + tWidth;
+        this._gradientStartPoint.y = tHeight * locAlongVector.y - tHeight;
+        this._gradientEndPoint.x = tWidth * locAlongVector.x + tWidth;
+        this._gradientEndPoint.y = tHeight * (-locAlongVector.y) - tHeight;
     }
 });
 
