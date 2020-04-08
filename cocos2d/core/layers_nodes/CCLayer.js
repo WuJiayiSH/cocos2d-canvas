@@ -1355,11 +1355,17 @@ if (!cc.Browser.supportWebGL) {
  */
 cc.GRADIENT_TYPE_LINEAR = 0;
 
-/** Radial gradient
+/** Radial gradient with both starting and ending at anchor point.
  * @type Number
  * @constant
  */
-cc.GRADIENT_TYPE_RADIAL = 1;
+cc.GRADIENT_TYPE_RADIAL_AR = 1;
+
+/** Radial gradient with starting and ending along with the given vector
+ * @type Number
+ * @constant
+ */
+cc.GRADIENT_TYPE_RADIAL_DIRECTIONAL = 2;
 
 /**
  * <p>
@@ -1592,7 +1598,7 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
     },
 
     /**
-     * @param {cc.GRADIENT_TYPE_LINEAR|cc.GRADIENT_TYPE_RADIAL} type
+     * @param {cc.GRADIENT_TYPE_LINEAR|cc.GRADIENT_TYPE_RADIAL_AR|GRADIENT_TYPE_RADIAL_DIRECTIONAL} type
      */
     setType:function (type) {
         if (type !== this._type)
@@ -1651,9 +1657,12 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
         if (this._type === cc.GRADIENT_TYPE_LINEAR) {
             tGradient = context.createLinearGradient(this._gradientStartPoint.x * scaleX, this._gradientStartPoint.y * scaleY,
                 this._gradientEndPoint.x * scaleX, this._gradientEndPoint.y * scaleY);
+        } else if (this._type === cc.GRADIENT_TYPE_RADIAL_AR {
+            tGradient = context.createRadialGradient(tWidth * this._anchorPoint.x, -tHeight * this._anchorPoint.y, this._startRadius * scaleX,
+                tWidth * this._anchorPoint.x, -tHeight * this._anchorPoint.y, this._endRadius * scaleX);
         } else {
-            tGradient = context.createRadialGradient(tWidth * this._anchorPoint.x, -tHeight * this._anchorPoint.y, this._startRadius,
-                tWidth * this._anchorPoint.x, -tHeight * this._anchorPoint.y, this._endRadius);
+            tGradient = context.createRadialGradient(this._gradientStartPoint.x * scaleX, this._gradientStartPoint.y * scaleY, this._startRadius * scaleX,
+                this._gradientEndPoint.x * scaleX, this._gradientEndPoint.y * scaleY, this._endRadius * scaleX);
         }
 
         for(var i = 0; i < this._colorStops.length; i++) {
