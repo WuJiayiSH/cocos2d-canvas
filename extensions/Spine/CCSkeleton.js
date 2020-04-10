@@ -139,23 +139,14 @@ sp.Skeleton = cc.NodeRGBA.extend({
     },
 
     boundingBox: function () {
-        var minX = cc.FLT_MAX, minY = cc.FLT_MAX, maxX = cc.FLT_MIN, maxY = cc.FLT_MIN;
-        var scaleX = this.getScaleX(), scaleY = this.getScaleY(), vertices = [],
-            slots = this._skeleton.slots, VERTEX = sp.VERTEX_INDEX;
-
-        for (var i = 0, slotCount = slots.length; i < slotCount; ++i) {
-            var slot = slots[i];
-            if (!slot.attachment || slot.attachment.type != sp.ATTACHMENT_TYPE.REGION)
-                continue;
-            var attachment = slot.attachment;
-            sp.regionAttachment_computeWorldVertices(attachment, slot.skeleton.x, slot.skeleton.y, slot.bone, vertices);
-            minX = Math.min(minX, vertices[VERTEX.X1] * scaleX, vertices[VERTEX.X4] * scaleX, vertices[VERTEX.X2] * scaleX, vertices[VERTEX.X3] * scaleX);
-            minY = Math.min(minY, vertices[VERTEX.Y1] * scaleY, vertices[VERTEX.Y4] * scaleY, vertices[VERTEX.Y2] * scaleY, vertices[VERTEX.Y3] * scaleY);
-            maxX = Math.max(maxX, vertices[VERTEX.X1] * scaleX, vertices[VERTEX.X4] * scaleX, vertices[VERTEX.X2] * scaleX, vertices[VERTEX.X3] * scaleX);
-            maxY = Math.max(maxY, vertices[VERTEX.Y1] * scaleY, vertices[VERTEX.Y4] * scaleY, vertices[VERTEX.Y2] * scaleY, vertices[VERTEX.Y3] * scaleY);
+        var bounds = new sp.spine.SkeletonBounds();
+        bounds.update(this._skeleton._sgNode._skeleton);
+        var rect = bounds.boundingBoxes[0] || cc.rect(0, 0, this._contentSize.width, this._contentSize.height)
+        for (var i = 1; i < bounds.boundingBoxes.length; i++) {
+            rect = cc.rectUnion(rect, bounds.boundingBoxes[i]);
         }
-        var position = this.getPosition();
-        return cc.rect(position.x + minX, position.y + minY, maxX - minX, maxY - minY);
+        
+        return cc._RectApplyAffineTransformIn(rect, this.nodeToParentTransform());
     },
     updateWorldTransform: function () {
         this._skeleton.updateWorldTransform();
