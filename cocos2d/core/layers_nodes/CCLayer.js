@@ -1349,23 +1349,29 @@ if (!cc.Browser.supportWebGL) {
     _p = null;
 }
 
+/** No gradient 
+ * @type Number
+ * @constant
+ */
+cc.GRADIENT_TYPE_NONE = 0;
+
 /** Linear gradient 
  * @type Number
  * @constant
  */
-cc.GRADIENT_TYPE_LINEAR = 0;
+cc.GRADIENT_TYPE_LINEAR = 1;
 
 /** Radial gradient with both starting and ending at anchor point.
  * @type Number
  * @constant
  */
-cc.GRADIENT_TYPE_RADIAL_AR = 1;
+cc.GRADIENT_TYPE_RADIAL_AR = 2;
 
 /** Radial gradient with starting and ending along with the given vector
  * @type Number
  * @constant
  */
-cc.GRADIENT_TYPE_RADIAL_DIRECTIONAL = 2;
+cc.GRADIENT_TYPE_RADIAL_DIRECTIONAL = 3;
 
 /**
  * <p>
@@ -1598,7 +1604,7 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
     },
 
     /**
-     * @param {cc.GRADIENT_TYPE_LINEAR|cc.GRADIENT_TYPE_RADIAL_AR|GRADIENT_TYPE_RADIAL_DIRECTIONAL} type
+     * @param {cc.GRADIENT_TYPE_NONE|cc.GRADIENT_TYPE_LINEAR|cc.GRADIENT_TYPE_RADIAL_AR|GRADIENT_TYPE_RADIAL_DIRECTIONAL} type
      */
     setType:function (type) {
         if (type !== this._type)
@@ -1657,22 +1663,27 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
         if (this._type === cc.GRADIENT_TYPE_LINEAR) {
             tGradient = context.createLinearGradient(this._gradientStartPoint.x * scaleX, this._gradientStartPoint.y * scaleY,
                 this._gradientEndPoint.x * scaleX, this._gradientEndPoint.y * scaleY);
-        } else if (this._type === cc.GRADIENT_TYPE_RADIAL_AR {
+        } else if (this._type === cc.GRADIENT_TYPE_RADIAL_AR) {
             tGradient = context.createRadialGradient(tWidth * this._anchorPoint.x, -tHeight * this._anchorPoint.y, this._startRadius * scaleX,
                 tWidth * this._anchorPoint.x, -tHeight * this._anchorPoint.y, this._endRadius * scaleX);
-        } else {
+        } else if (this._type === cc.GRADIENT_TYPE_RADIAL_DIRECTIONAL){
             tGradient = context.createRadialGradient(this._gradientStartPoint.x * scaleX, this._gradientStartPoint.y * scaleY, this._startRadius * scaleX,
                 this._gradientEndPoint.x * scaleX, this._gradientEndPoint.y * scaleY, this._endRadius * scaleX);
         }
 
-        for(var i = 0; i < this._colorStops.length; i++) {
-            var stopOffset = this._colorStops[i][0];
-            var stopColor = this._colorStops[i][1];
-            tGradient.addColorStop(stopOffset, "rgba(" + Math.round(stopColor.r) + "," + Math.round(stopColor.g) + ","
-            + Math.round(stopColor.b) + "," + (opacityf * (stopColor.a / 255)).toFixed(4) + ")");
+        if (tGradient) { 
+            for(var i = 0; i < this._colorStops.length; i++) {
+                var stopOffset = this._colorStops[i][0];
+                var stopColor = this._colorStops[i][1];
+                tGradient.addColorStop(stopOffset, "rgba(" + Math.round(stopColor.r) + "," + Math.round(stopColor.g) + ","
+                + Math.round(stopColor.b) + "," + (opacityf * (stopColor.a / 255)).toFixed(4) + ")");
+            }
+            context.fillStyle = tGradient;
+        } else {
+            var locDisplayedColor = this._displayedColor;
+            context.fillStyle = "rgba(" + (0 | locDisplayedColor.r) + "," + (0 | locDisplayedColor.g) + ","
+                + (0 | locDisplayedColor.b) + "," + this._displayedOpacity / 255 + ")";
         }
-
-        context.fillStyle = tGradient;
         context.fillRect(0, 0, tWidth, -tHeight);
 
         if (this._rotation != 0)
@@ -1682,8 +1693,8 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
 
     _updateColor:function () {
         var locAlongVector = this._alongVector;
-        var tWidth = this.getContentSize().width * 0.5;
-        var tHeight = this.getContentSize().height * 0.5;
+        var tWidth = this._contentSize.width * 0.5;
+        var tHeight = this._contentSize.height * 0.5;
 
         this._gradientStartPoint.x = tWidth * (-locAlongVector.x) + tWidth;
         this._gradientStartPoint.y = tHeight * locAlongVector.y - tHeight;

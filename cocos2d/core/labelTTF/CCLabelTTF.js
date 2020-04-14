@@ -68,6 +68,14 @@ cc.LabelTTF = cc.Sprite.extend(/** @lends cc.LabelTTF# */{
     _labelContext:null,
     _lineWidths:null,
 
+    _startRadius:null,
+    _endRadius:null,
+    _alongVector:null,
+    _gradientStartPoint:null,
+    _gradientEndPoint:null,
+    _type: null,
+    _colorStops: null,
+
     /**
      * Constructor
      */
@@ -98,6 +106,14 @@ cc.LabelTTF = cc.Sprite.extend(/** @lends cc.LabelTTF# */{
         this._strokeShadowOffsetX = 0;
         this._strokeShadowOffsetY = 0;
         this._needUpdateTexture = false;
+        
+        this._alongVector = cc.p(0, -1);
+        this._startRadius = 0;
+        this._endRadius = 0;
+        this._gradientStartPoint = cc.p(0, 0);
+        this._gradientEndPoint = cc.p(0, 0);
+        this._type = cc.GRADIENT_TYPE_NONE;
+        this._colorStops = [];
 
         this._lineWidths = [];
 
@@ -643,6 +659,97 @@ cc.LabelTTF = cc.Sprite.extend(/** @lends cc.LabelTTF# */{
         }
     },
 
+    /**
+     * add a color stop
+     * @param {Number} offset from 0 to 1
+     * @param {cc.Color4B} color
+     */
+    addColorStop:function (offset, color) {
+        this._colorStops.push([offset, color])
+        this._needUpdateTexture = true;
+    },
+
+    /**
+     * remove all the color stops
+     */
+    removeAllColorStops:function () {
+        this._colorStops.length = 0;
+        this._needUpdateTexture = true;
+    },
+
+    /**
+     * set starting gradient radius
+     * @param {Number} r
+     */
+    setStartRadius:function (r) {
+        this._startRadius = r;
+        this._needUpdateTexture = true;
+    },
+
+    /**
+     * get the starting gradient radius
+     * @return {Number}
+     */
+    getStartRadius:function () {
+        return this._startRadius;
+    },
+
+    /**
+     * set the end gradient radius
+     * @param {Number} r
+     */
+    setEndRadius:function (r) {
+        this._endRadius = r;
+        this._needUpdateTexture = true;
+    },
+
+    /**
+     * get the end gradient radius
+     * @return {Number}
+     */
+    getEndRadius:function () {
+        return this._endRadius;
+    },
+
+    /**
+     * set vector
+     * @param {cc.Point} Var
+     */
+    setVector:function (Var) {
+        this._alongVector.x = Var.x;
+        this._alongVector.y = Var.y;
+        this._updateColor();
+        this._needUpdateTexture = true;
+    },
+
+    /**
+     * @return {cc.Point}
+     */
+    getVector:function () {
+        return cc.p(this._alongVector.x, this._alongVector.y);
+    },
+
+    /**
+     * @param {cc.GRADIENT_TYPE_NONE|cc.GRADIENT_TYPE_LINEAR|cc.GRADIENT_TYPE_RADIAL_AR|GRADIENT_TYPE_RADIAL_DIRECTIONAL} type
+     */
+    setType:function (type) {
+        if (type !== this._type) {
+            this._type = type;
+            this._needUpdateTexture = true;
+        }
+    },
+
+    _updateColor:function () {
+        var locAlongVector = this._alongVector;
+        var tWidth = this._contentSize.width * 0.5;
+        var tHeight = this._contentSize.height * 0.5;
+
+        this._gradientStartPoint.x = tWidth * (-locAlongVector.x) + tWidth;
+        this._gradientStartPoint.y = tHeight * locAlongVector.y - tHeight;
+        this._gradientEndPoint.x = tWidth * locAlongVector.x + tWidth;
+        this._gradientEndPoint.y = tHeight * (-locAlongVector.y) - tHeight;
+    },
+    
     _drawTTFInCanvas: function (context) {
         if (!context)
             return;
@@ -655,8 +762,33 @@ cc.LabelTTF = cc.Sprite.extend(/** @lends cc.LabelTTF# */{
         //this is fillText for canvas
         if (context.font != this._fontStyleStr)
             context.font = this._fontStyleStr;
-        context.fillStyle = this._fillColorStr;
 
+        var tGradient = null;
+        if (this._type === cc.GRADIENT_TYPE_LINEAR) {
+            tGradient = context.createLinearGradient(this._gradientStartPoint.x, this._gradientStartPoint.y,
+                this._gradientEndPoint.x, this._gradientEndPoint.y);
+        } else if (this._type === cc.GRADIENT_TYPE_RADIAL_AR) {
+            var tWidth = this._contentSize.width, tHeight = this._contentSize.height;
+            tGradient = context.createRadialGradient(tWidth * this._anchorPoint.x, -tHeight * this._anchorPoint.y, this._startRadius,
+                tWidth * this._anchorPoint.x, -tHeight * this._anchorPoint.y, this._endRadius);
+        } else if (this._type === cc.GRADIENT_TYPE_RADIAL_DIRECTIONAL){
+            tGradient = context.createRadialGradient(this._gradientStartPoint.x, this._gradientStartPoint.y, this._startRadius,
+                this._gradientEndPoint.x, this._gradientEndPoint.y, this._endRadius);
+        }
+
+        if (tGradient) { 
+            var opacityf = this._displayedOpacity / 255.0;
+            for(var i = 0; i < this._colorStops.length; i++) {
+                var stopOffset = this._colorStops[i][0];
+                var stopColor = this._colorStops[i][1];
+                tGradient.addColorStop(stopOffset, "rgba(" + Math.round(stopColor.r) + "," + Math.round(stopColor.g) + ","
+                + Math.round(stopColor.b) + "," + (opacityf * (stopColor.a / 255)).toFixed(4) + ")");
+            }
+            context.fillStyle = tGradient;
+        } else {
+            context.fillStyle = this._fillColorStr;
+        }
+        
         var xOffset = 0, yOffset = 0;
         //stroke style setup
         var locStrokeEnabled = this._strokeEnabled;
@@ -808,6 +940,11 @@ cc.LabelTTF = cc.Sprite.extend(/** @lends cc.LabelTTF# */{
         var locAP = this._anchorPoint;
         this._anchorPointInPoints.x = (locStrokeShadowOffsetX * 0.5) + ((locSize.width - locStrokeShadowOffsetX) * locAP.x);
         this._anchorPointInPoints.y = (locStrokeShadowOffsetY * 0.5) + ((locSize.height - locStrokeShadowOffsetY) * locAP.y);
+    },
+
+    setContentSize:function(size, height){
+	    cc.LayerColor.prototype.setContentSize.call(this,size, height);
+        this._updateColor();
     },
 
     getContentSize:function(){
