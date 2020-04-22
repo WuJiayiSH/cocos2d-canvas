@@ -1355,4 +1355,7 @@ cc.FontDefinition = function(){
     this.shadowOffset = cc.size(0,0);
     this.shadowBlur = 0;
     this.shadowOpacity = 1.0;
+
+    this.isBold = false;
+    this.isItalic = false;
 };

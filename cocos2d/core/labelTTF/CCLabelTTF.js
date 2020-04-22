@@ -38,6 +38,8 @@ cc.LabelTTF = cc.Sprite.extend(/** @lends cc.LabelTTF# */{
     _vAlignment:cc.VERTICAL_TEXT_ALIGNMENT_TOP,
     _fontName: null,
     _fontSize:0.0,
+    _isBold: false,
+    _isItalic: false,
     _string:"",
     _originalText: null,
     _isMultiLine:false,
@@ -326,7 +328,7 @@ cc.LabelTTF = cc.Sprite.extend(/** @lends cc.LabelTTF# */{
 
             //this._fontSize = (cc.renderContextType === cc.CANVAS) ? fontSize : fontSize * cc.CONTENT_SCALE_FACTOR();
             this._fontSize = fontSize;
-            this._fontStyleStr = this._fontSize + "px '" + fontName + "'";
+            this._fontStyleStr = (this._isItalic?"italic ":"") + (this._isBold?"bold ":"") + this._fontSize + "px '" + fontName + "'";
             this._fontClientHeight = cc.LabelTTF.__getFontHeightByDiv(fontName,this._fontSize);
             this.setString(strInfo);
             this._setColorsString();
@@ -512,7 +514,9 @@ cc.LabelTTF = cc.Sprite.extend(/** @lends cc.LabelTTF# */{
 
         this._fontName   = textDefinition.fontName;
         this._fontSize   = textDefinition.fontSize||12;
-        this._fontStyleStr = this._fontSize + "px '" + this._fontName + "'";
+        this._isBold   = textDefinition._isBold||false;
+        this._isItalic   = textDefinition._isItalic||false;
+        this._fontStyleStr = (this._isItalic?"italic ":"") + (this._isBold?"bold ":"") + this._fontSize + "px '" + this._fontName + "'";
         this._fontClientHeight = cc.LabelTTF.__getFontHeightByDiv(this._fontName,this._fontSize);
 
         // shadow
@@ -638,7 +642,7 @@ cc.LabelTTF = cc.Sprite.extend(/** @lends cc.LabelTTF# */{
     setFontSize:function (fontSize) {
         if (this._fontSize !== fontSize) {
             this._fontSize = fontSize;
-            this._fontStyleStr = fontSize + "px '" + this._fontName + "'";
+            this._fontStyleStr = (this._isItalic?"italic ":"") + (this._isBold?"bold ":"") + fontSize + "px '" + this._fontName + "'";
             this._fontClientHeight = cc.LabelTTF.__getFontHeightByDiv(this._fontName,fontSize);
             // Force update
             this._needUpdateTexture = true;
@@ -652,8 +656,36 @@ cc.LabelTTF = cc.Sprite.extend(/** @lends cc.LabelTTF# */{
     setFontName:function (fontName) {
         if (this._fontName && this._fontName != fontName ) {
             this._fontName = fontName;
-            this._fontStyleStr = this._fontSize + "px '" + fontName + "'";
+            this._fontStyleStr = (this._isItalic?"italic ":"") + (this._isBold?"bold ":"") + this._fontSize + "px '" + fontName + "'";
             this._fontClientHeight = cc.LabelTTF.__getFontHeightByDiv(fontName,this._fontSize);
+            // Force update
+            this._needUpdateTexture = true;
+        }
+    },
+
+    /**
+     * set bold of cc.LabelTTF
+     * @param {Boolean} isBold
+     */
+    setBold:function (isBold) {
+        if (this._isBold != isBold ) {
+            this._isBold = isBold;
+            this._fontStyleStr = (this._isItalic?"italic ":"") + (this._isBold?"bold ":"") + this._fontSize + "px '" + this._fontName + "'";
+            this._fontClientHeight = cc.LabelTTF.__getFontHeightByDiv(this._fontName,this._fontSize);
+            // Force update
+            this._needUpdateTexture = true;
+        }
+    },
+
+    /**
+     * set italic of cc.LabelTTF
+     * @param {Boolean} isItalic
+     */
+    setItalic:function (isItalic) {
+        if (this._isItalic != isItalic ) {
+            this._isItalic = isItalic;
+            this._fontStyleStr = (this._isItalic?"italic ":"") + (this._isBold?"bold ":"") + this._fontSize + "px '" + this._fontName + "'";
+            this._fontClientHeight = cc.LabelTTF.__getFontHeightByDiv(this._fontName,this._fontSize);
             // Force update
             this._needUpdateTexture = true;
         }
