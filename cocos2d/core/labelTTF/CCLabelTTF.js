@@ -298,6 +298,22 @@ cc.LabelTTF = cc.Sprite.extend(/** @lends cc.LabelTTF# */{
     },
 
     /**
+     * return if label is bold
+     * @return {Boolean}
+     */
+    isBold:function () {
+        return this._isBold;
+    },
+
+    /**
+     * return if label is italic
+     * @return {Boolean}
+     */
+    isItalic:function () {
+        return this._isItalic;
+    },
+
+    /**
      * initializes the cc.LabelTTF with a font name, alignment, dimension and font size
      * @param {String} label string
      * @param {String} fontName

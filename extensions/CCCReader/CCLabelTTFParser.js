@@ -2,13 +2,13 @@ cc.CanvasEditor.CCLabelTTFParser = cc.Class.extend({
     ctor: function () {
     },
     loadCCNode: function () {
-        return cc.LabelTTF.create("Hello")
+        return cc.LabelTTF.create("Hello");
     },
     getSuperClassName: function () {
-        return "CCNode"
+        return "CCNode";
     },
     getClassName: function () {
-        return "CCLabelTTF"
+        return "CCLabelTTF";
     },
     toObject: function (node) {
         return {
@@ -19,6 +19,8 @@ cc.CanvasEditor.CCLabelTTFParser = cc.Class.extend({
             dim: { w: node.getDimensions().width, h: node.getDimensions().height },
             flip: { x: node.isFlippedX(), y: node.isFlippedY() },
             align: { h: node.getHorizontalAlignment(), v: node.getVerticalAlignment() },
+            bold: node.isBold(),
+            italic: node.isItalic(),
             stroke: {
                 enabled: node._strokeEnabled,
                 size: node._strokeSize,
@@ -34,20 +36,24 @@ cc.CanvasEditor.CCLabelTTFParser = cc.Class.extend({
     },
     onHandleProp: function (node, propertyName, value) {
         if (propertyName === "string") {
-            node.setString(value)
+            node.setString(value);
         } else if (propertyName === "color") {
-            var rgba = cc.CanvasEditor._fromRgba(value)
-            node.setColor(rgba[0])
-            node.setOpacity(rgba[1])
+            var rgba = cc.CanvasEditor._fromRgba(value);
+            node.setColor(rgba[0]);
+            node.setOpacity(rgba[1]);
         } else if (propertyName === "size") {
-            node.setFontSize(value)
+            node.setFontSize(value);
         } else if (propertyName === "font") {
-            node.setFontName(value)
+            node.setFontName(value);
         } else if (propertyName === "align") {
-            node.setHorizontalAlignment(value.h)
-            node.setVerticalAlignment(value.v)
+            node.setHorizontalAlignment(value.h);
+            node.setVerticalAlignment(value.v);
         } else if (propertyName === "dim") {
-            node.setDimensions(cc.size(value.w, value.h))
+            node.setDimensions(cc.size(value.w, value.h));
+        } else if (propertyName === "bold") {
+            node.setBold(value);
+        } else if (propertyName === "italic") {
+            node.setItalic(value);
         } else if (propertyName === "stroke") {
             if (value.enabled) {
                 node.enableStroke(cc.CanvasEditor._fromHexString(value.color), value.size);
