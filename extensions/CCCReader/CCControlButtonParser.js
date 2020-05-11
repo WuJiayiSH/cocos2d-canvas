@@ -28,6 +28,8 @@ cc.CanvasEditor.CCControlButtonParser = cc.Class.extend({
             string: node.getTitleForState(),
             font: node.getTitleTTFForState(),
             size: node.getTitleTTFSizeForState(),
+            bold: label.isBold(),
+            italic: label.isItalic(),
             stroke: {
                 enabled: label._strokeEnabled,
                 size: label._strokeSize,
@@ -99,6 +101,10 @@ cc.CanvasEditor.CCControlButtonParser = cc.Class.extend({
                 locTable[itemKey].setInsetTop(value.t)
                 locTable[itemKey].setInsetBottom(value.b)
             }
+        } else if (propertyName === "bold") {
+            label.setBold(value);
+        } else if (propertyName === "italic") {
+            label.setItalic(value);
         } else if (propertyName === "stroke") {
             if (value.enabled) {
                 label.enableStroke(cc.CanvasEditor._fromHexString(value.color), value.size);
