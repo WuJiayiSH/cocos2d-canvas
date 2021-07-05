@@ -318,6 +318,7 @@ cc.Sprite = cc.NodeRGBA.extend(/** @lends cc.Sprite# */{
     // Data used when the sprite is self-rendered
     //
     _blendFunc:null, //It's required for CCTextureProtocol inheritance
+    _compositeOperation: null,
     _texture:null, //cc.Texture2D object that is used to render the sprite
 
     //
@@ -1056,6 +1057,18 @@ cc.Sprite = cc.NodeRGBA.extend(/** @lends cc.Sprite# */{
             locBlendFunc.dst = dst;
         }
     },
+
+    /**
+     * composite operation setter
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
+     * Composite operation is not supported in webgl renderer and flash canvas, plus browsers behave slightly different. 
+     * check @see http://www.rekim.com/2011/02/11/html5-canvas-globalcompositeoperation-browser-handling/ for compatibility issue
+     * @param {String} compositeOperation
+     */
+    setCompositeOperation:function (compositeOperation) {
+        this._compositeOperation = compositeOperation;
+    },
+
     /**
      * @deprecated It should work with webgl, but globalCompositeOperation in canvas does not cover all the situations, plus flashcanvas does not support globalCompositeOperation at all
      */
@@ -2102,7 +2115,10 @@ cc.Sprite = cc.NodeRGBA.extend(/** @lends cc.Sprite# */{
             return;
 
         var context = ctx || cc.renderContext;
-        if (this._isLighterMode)
+        context.save();
+        if (this._compositeOperation)
+            context.globalCompositeOperation = this._compositeOperation;
+        else if (this._isLighterMode)
             context.globalCompositeOperation = 'lighter';
 
         var locEGL_ScaleX = cc.EGLView.getInstance().getScaleX(), locEGL_ScaleY = cc.EGLView.getInstance().getScaleY();
@@ -2114,7 +2130,6 @@ cc.Sprite = cc.NodeRGBA.extend(/** @lends cc.Sprite# */{
         locDrawSizeCanvas.height = locRect.height * locEGL_ScaleY;
 
         if (this._flippedX || this._flippedY) {
-            context.save();
             if (this._flippedX) {
                 flipXOffset = -locOffsetPosition.x - locRect.width;
                 context.scale(-1, 1);
@@ -2165,8 +2180,8 @@ cc.Sprite = cc.NodeRGBA.extend(/** @lends cc.Sprite# */{
                 cc.p(flipXOffset + drawSize.width, flipYOffset - drawSize.height), cc.p(flipXOffset, flipYOffset - drawSize.height)];
             cc.drawingUtil.drawPoly(vertices2, 4, true);
         }
-        if (this._flippedX || this._flippedY)
-            context.restore();
+        
+        context.restore();
         cc.g_NumberOfDraws++;
     }
 });

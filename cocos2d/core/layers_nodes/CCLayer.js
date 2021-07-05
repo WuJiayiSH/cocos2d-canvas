@@ -957,7 +957,7 @@ cc.LayerRGBA = cc.Layer.extend(/** @lends cc.LayerRGBA# */{
  */
 cc.LayerColor = cc.LayerRGBA.extend(/** @lends cc.LayerColor# */{
     _blendFunc:null,
-
+    _compositeOperation: null,
     /**
      * blendFunc getter
      * @return {cc.BlendFunc}
@@ -1063,6 +1063,17 @@ cc.LayerColor = cc.LayerRGBA.extend(/** @lends cc.LayerColor# */{
             this._blendFunc = {src:src, dst:dst};
         if(cc.renderContextType === cc.CANVAS)
             this._isLighterMode = (this._blendFunc && (this._blendFunc.src == 1) && (this._blendFunc.dst == 771));
+    },
+
+    /**
+     * composite operation setter
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
+     * Composite operation is not supported in webgl renderer and flash canvas, plus browsers behave slightly different. 
+     * check @see http://www.rekim.com/2011/02/11/html5-canvas-globalcompositeoperation-browser-handling/ for compatibility issue
+     * @param {String} compositeOperation
+     */
+    setCompositeOperation:function (compositeOperation) {
+        this._compositeOperation = compositeOperation;
     },
 
     /**
@@ -1174,6 +1185,11 @@ cc.LayerColor = cc.LayerRGBA.extend(/** @lends cc.LayerColor# */{
     _drawForCanvas:function (ctx) {
         var context = ctx || cc.renderContext;
 
+        if (this._compositeOperation) {
+            context.save();
+            context.globalCompositeOperation = this._compositeOperation;
+        }
+        
         var locContentSize = this.getContentSize(), locEGLViewer = cc.EGLView.getInstance();
 
         var locDisplayedColor = this._displayedColor;
@@ -1182,6 +1198,9 @@ cc.LayerColor = cc.LayerRGBA.extend(/** @lends cc.LayerColor# */{
             + (0 | locDisplayedColor.b) + "," + this._displayedOpacity / 255 + ")";
         context.fillRect(0, 0, locContentSize.width * locEGLViewer.getScaleX(), -locContentSize.height * locEGLViewer.getScaleY());
 
+        if (this._compositeOperation)
+            context.restore();
+        
         cc.g_NumberOfDraws++;
     },
 
@@ -1551,10 +1570,13 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
         }
 
         var context = ctx || cc.renderContext;
-        if (this._isLighterMode)
+        
+        context.save();
+        if (this._compositeOperation)
+            context.globalCompositeOperation = this._compositeOperation;
+        else if (this._isLighterMode)
             context.globalCompositeOperation = 'lighter';
 
-        context.save();
         var locEGLViewer = cc.EGLView.getInstance(),opacityf = this._displayedOpacity / 255.0;
         var scaleX = locEGLViewer.getScaleX(), scaleY = locEGLViewer.getScaleY();
         var tWidth = this.getContentSize().width * scaleX, tHeight = this.getContentSize().height * scaleY;

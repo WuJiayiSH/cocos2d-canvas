@@ -310,6 +310,7 @@ cc.ParticleSystem = cc.Node.extend(/** @lends cc.ParticleSystem# */{
     _totalParticles: 0,
     _texture: null,
     _blendFunc: null,
+    _compositeOperation: null,
     _opacityModifyRGB: false,
     _positionType: cc.PARTICLE_TYPE_FREE,
     _isAutoRemoveOnFinish: false,
@@ -1357,6 +1358,17 @@ cc.ParticleSystem = cc.Node.extend(/** @lends cc.ParticleSystem# */{
                 this._updateBlendFunc();
             }
         }
+    },
+
+    /**
+     * composite operation setter
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
+     * Composite operation is not supported in webgl renderer and flash canvas, plus browsers behave slightly different. 
+     * check @see http://www.rekim.com/2011/02/11/html5-canvas-globalcompositeoperation-browser-handling/ for compatibility issue
+     * @param {String} compositeOperation
+     */
+    setCompositeOperation:function (compositeOperation) {
+        this._compositeOperation = compositeOperation;
     },
 
     /**
@@ -2451,7 +2463,9 @@ cc.ParticleSystem = cc.Node.extend(/** @lends cc.ParticleSystem# */{
     _drawForCanvas:function (ctx) {
         var context = ctx || cc.renderContext;
         context.save();
-        if (this.isBlendAdditive())
+        if (this._compositeOperation)
+            context.globalCompositeOperation = this._compositeOperation;
+        else if (this.isBlendAdditive())
             context.globalCompositeOperation = 'lighter';
         else
             context.globalCompositeOperation = 'source-over';

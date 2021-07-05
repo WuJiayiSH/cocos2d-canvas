@@ -420,7 +420,10 @@ cc.ProgressTimer = cc.NodeRGBA.extend(/** @lends cc.ProgressTimer# */{
         var context = ctx || cc.renderContext;
 
         var locSprite = this._sprite;
-        if (locSprite._isLighterMode)
+        context.save();
+        if (locSprite._compositeOperation)
+            context.globalCompositeOperation = locSprite._compositeOperation;
+        else if (locSprite._isLighterMode)
             context.globalCompositeOperation = 'lighter';
 
         var locEGL_ScaleX = cc.EGLView.getInstance().getScaleX(), locEGL_ScaleY = cc.EGLView.getInstance().getScaleY();
@@ -431,7 +434,7 @@ cc.ProgressTimer = cc.NodeRGBA.extend(/** @lends cc.ProgressTimer# */{
         locDrawSizeCanvas.width = locRect.width * locEGL_ScaleX;
         locDrawSizeCanvas.height = locRect.height * locEGL_ScaleY;
 
-        context.save();
+        
         if (locSprite._flippedX) {
             flipXOffset = -locOffsetPosition.x - locRect.width;
             context.scale(-1, 1);

@@ -90,6 +90,7 @@ cc.__t = function (v) {
 cc.DrawNodeCanvas = cc.Node.extend(/** @lends cc.DrawNodeCanvas# */{
     _buffer: null,
     _blendFunc: null,
+    _compositeOperation: null,
     _lineWidth: 0,
     _drawColor: null,
 
@@ -110,6 +111,16 @@ cc.DrawNodeCanvas = cc.Node.extend(/** @lends cc.DrawNodeCanvas# */{
      */
     setBlendFunc: function (blendFunc) {
         this._blendFunc = blendFunc;
+    },
+    /**
+     * composite operation setter
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
+     * Composite operation is not supported in webgl renderer and flash canvas, plus browsers behave slightly different. 
+     * check @see http://www.rekim.com/2011/02/11/html5-canvas-globalcompositeoperation-browser-handling/ for compatibility issue
+     * @param {String} compositeOperation
+     */
+    setCompositeOperation:function (compositeOperation) {
+        this._compositeOperation = compositeOperation;
     },
 
     /**
@@ -420,7 +431,10 @@ cc.DrawNodeCanvas = cc.Node.extend(/** @lends cc.DrawNodeCanvas# */{
 
     draw: function (ctx) {
         var context = ctx || cc.renderContext;
-        if ((this._blendFunc && (this._blendFunc.src == gl.SRC_ALPHA) && (this._blendFunc.dst == gl.ONE)))
+        context.save();
+        if (this._compositeOperation)
+            context.globalCompositeOperation = this._compositeOperation;
+        else if ((this._blendFunc && (this._blendFunc.src == gl.SRC_ALPHA) && (this._blendFunc.dst == gl.ONE)))
             context.globalCompositeOperation = 'lighter';
 
         for (var i = 0; i < this._buffer.length; i++) {
@@ -437,6 +451,7 @@ cc.DrawNodeCanvas = cc.Node.extend(/** @lends cc.DrawNodeCanvas# */{
                     break;
             }
         }
+        context.restore();
     },
 
     _drawDot: function (ctx, element) {
@@ -536,6 +551,7 @@ cc.DrawNodeWebGL = cc.Node.extend(/** @lends cc.DrawNodeWebGL# */{
     _trianglesReader:null,
 
     _blendFunc:null,
+    _compositeOperation: null,
     _dirty:false,
 
     // ----common function start ----
@@ -547,6 +563,9 @@ cc.DrawNodeWebGL = cc.Node.extend(/** @lends cc.DrawNodeWebGL# */{
      */
     setBlendFunc:function (blendFunc) {
         this._blendFunc = blendFunc;
+    },
+    setCompositeOperation:function (compositeOperation) {
+        this._compositeOperation = compositeOperation;
     },
     // ----common function end ----
 
